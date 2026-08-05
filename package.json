@@ -41,7 +41,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.4",
+    "@biomejs/biome": "2.5.6",
     "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
     "@playwright/test": "^1.62.1",
@@ -53,13 +53,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@vitejs/plugin-react": "^6.0.5",
     "@vitest/coverage-v8": "4.1.10",
     "husky": "^9.1.7",
     "jest-axe": "^11.0.0",
     "jsdom": "^29.1.1",
     "lint-staged": "^17.3.0",
-    "shadcn": "^4.13.1",
+    "shadcn": "^4.16.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
