@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSession } from "@/features/auth/server";
 import { notesService } from "@/features/notes/server";
 import { createNoteSchema } from "@/features/notes/types";
+import { readJsonBody } from "@/lib/http";
 
 // An HTTP adapter and nothing else: authenticate, parse, delegate, map the
 // result to a status code. The rules live in the service.
@@ -28,7 +29,12 @@ export async function POST(request: Request) {
     return unauthorized();
   }
 
-  const parsed = createNoteSchema.safeParse(await request.json());
+  const body = await readJsonBody(request);
+  if (!body.ok) {
+    return body.response;
+  }
+
+  const parsed = createNoteSchema.safeParse(body.value);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Invalid note", issues: z.flattenError(parsed.error).fieldErrors },

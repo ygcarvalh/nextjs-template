@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Session } from "@/features/auth/types";
+import { MAX_NOTES_PER_OWNER } from "@/features/notes/server/notes-service";
 
 const getSessionMock = vi.hoisted(() => vi.fn());
 
@@ -69,6 +70,56 @@ describe("notes route handler", () => {
     const response = await POST(postRequest({ text: "x".repeat(281) }));
 
     expect(response.status).toBe(400);
+  });
+
+  it("POST returns 400 instead of throwing on malformed JSON", async () => {
+    const { POST } = await loadRoute();
+    const request = new Request("http://test/api/notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{not json",
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(400);
+  });
+
+  it("POST rejects a non-JSON content type with 415", async () => {
+    const { POST } = await loadRoute();
+    const request = new Request("http://test/api/notes", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: "text=hello",
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(415);
+  });
+
+  it("POST rejects an oversized body with 413", async () => {
+    const { POST } = await loadRoute();
+    const request = new Request("http://test/api/notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: "x".repeat(64 * 1024) }),
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(413);
+  });
+
+  it("POST refuses to exceed the per-owner note limit", async () => {
+    const { POST } = await loadRoute();
+    for (let index = 0; index < MAX_NOTES_PER_OWNER; index += 1) {
+      await POST(postRequest({ text: `note ${index}` }));
+    }
+
+    const response = await POST(postRequest({ text: "one too many" }));
+
+    expect(response.status).toBe(409);
   });
 
   it.each([
