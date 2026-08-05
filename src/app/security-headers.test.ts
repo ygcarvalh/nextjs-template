@@ -1,8 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import nextConfig from "../../next.config";
 
-// Locks the response header set in place. A header dropped by accident during
-// a refactor fails here rather than in production.
 async function headerMap() {
   const rules = await nextConfig.headers?.();
   const rule = rules?.find((entry) => entry.source === "/:path*");
@@ -55,5 +53,31 @@ describe("security headers", () => {
 
   it("nosniff is exact", async () => {
     expect((await headerMap()).get("X-Content-Type-Options")).toBe("nosniff");
+  });
+
+  describe("upgrade-insecure-requests", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+      vi.resetModules();
+    });
+
+    async function policyFor(appUrl: string) {
+      vi.resetModules();
+      vi.stubEnv("NEXT_PUBLIC_APP_URL", appUrl);
+      const { contentSecurityPolicy } = await import("@/lib/security-headers");
+      return contentSecurityPolicy;
+    }
+
+    it("is set on an https origin", async () => {
+      await expect(policyFor("https://example.com")).resolves.toContain(
+        "upgrade-insecure-requests",
+      );
+    });
+
+    it("is omitted on an http origin", async () => {
+      await expect(policyFor("http://localhost:3000")).resolves.not.toContain(
+        "upgrade-insecure-requests",
+      );
+    });
   });
 });
