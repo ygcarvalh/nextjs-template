@@ -1,4 +1,4 @@
-import { Database, KeyRound, ShieldCheck, SquareStack } from "lucide-react";
+import { Activity, ArrowRight, Database, KeyRound, ShieldCheck, SquareStack } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { VerificationLedger } from "@/features/verification/components/verification-ledger";
@@ -72,8 +72,10 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/notes" className={cn(buttonVariants())}>
               Try the protected example
+              <ArrowRight aria-hidden />
             </Link>
             <Link href="/api/health" className={cn(buttonVariants({ variant: "outline" }))}>
+              <Activity aria-hidden />
               Health check
             </Link>
           </div>

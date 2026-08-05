@@ -1,3 +1,4 @@
+import { ShieldCheck } from "lucide-react";
 import { verificationGates } from "@/features/verification/gates";
 
 export function VerificationLedger() {
@@ -5,8 +6,9 @@ export function VerificationLedger() {
     <section aria-labelledby="verification-heading" className="lg:sticky lg:top-8">
       <h2
         id="verification-heading"
-        className="font-medium font-mono text-[0.6875rem] text-muted-foreground uppercase tracking-[0.14em]"
+        className="flex items-center gap-2 font-medium font-mono text-[0.6875rem] text-muted-foreground uppercase tracking-[0.14em]"
       >
+        <ShieldCheck aria-hidden className="size-3.5 text-pass" strokeWidth={2} />
         Verification
       </h2>
 

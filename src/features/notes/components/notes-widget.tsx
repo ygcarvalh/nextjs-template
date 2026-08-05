@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleAlert, NotebookPen, Plus } from "lucide-react";
 import Image from "next/image";
 import { type FormEvent, useCallback, useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -97,12 +98,18 @@ export function NotesWidget() {
           aria-invalid={error ? true : undefined}
         />
         <Button type="submit" disabled={isSaving}>
+          <Plus aria-hidden />
           {isSaving ? "Adding…" : "Add"}
         </Button>
       </form>
 
       {error ? (
-        <p id={errorId} role="alert" className="mt-3 text-destructive text-sm">
+        <p
+          id={errorId}
+          role="alert"
+          className="mt-3 flex items-center gap-2 text-destructive text-sm"
+        >
+          <CircleAlert aria-hidden className="size-4 shrink-0" />
           {error}
         </p>
       ) : null}
@@ -114,14 +121,20 @@ export function NotesWidget() {
       ) : null}
 
       {status === "failed" ? (
-        <p className="mt-8 text-destructive text-sm" role="alert">
+        <p className="mt-8 flex items-center gap-2 text-destructive text-sm" role="alert">
+          <CircleAlert aria-hidden className="size-4 shrink-0" />
           Your notes could not be loaded. Reload the page to try again.
         </p>
       ) : null}
 
       {status === "ready" && notes.length === 0 ? (
         <div className="mt-8 rounded-lg border border-dashed p-8 text-center">
-          <p className="font-medium text-sm">No notes yet</p>
+          <NotebookPen
+            aria-hidden
+            className="mx-auto size-6 text-muted-foreground"
+            strokeWidth={1.5}
+          />
+          <p className="mt-3 font-medium text-sm">No notes yet</p>
           <p className="mt-1 text-muted-foreground text-sm">
             Write one above and it appears here, with a cover derived from its id.
           </p>

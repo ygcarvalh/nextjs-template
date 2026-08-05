@@ -1,3 +1,4 @@
+import { ArrowLeft, MapPinOff } from "lucide-react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -8,7 +9,8 @@ export default function NotFound() {
     <>
       <SiteHeader />
       <main id="main-content" className="mx-auto w-full max-w-xl flex-1 px-6 py-24">
-        <p className="font-medium font-mono text-[0.6875rem] text-muted-foreground uppercase tracking-[0.14em]">
+        <p className="flex items-center gap-2 font-medium font-mono text-[0.6875rem] text-muted-foreground uppercase tracking-[0.14em]">
+          <MapPinOff aria-hidden className="size-3.5" strokeWidth={2} />
           404
         </p>
 
@@ -34,6 +36,7 @@ export default function NotFound() {
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Link href="/" className={cn(buttonVariants())}>
+            <ArrowLeft aria-hidden />
             Go to the home page
           </Link>
           <Link href="/notes" className={cn(buttonVariants({ variant: "outline" }))}>

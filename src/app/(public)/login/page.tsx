@@ -1,3 +1,4 @@
+import { LockKeyhole } from "lucide-react";
 import type { Metadata } from "next";
 import { LoginForm } from "@/features/auth";
 import { safeRedirectPath } from "@/features/auth/server";
@@ -16,7 +17,8 @@ export default async function LoginPage({
 
   return (
     <div className="mx-auto w-full max-w-sm px-6 py-20 sm:py-28">
-      <p className="font-medium font-mono text-[0.6875rem] text-muted-foreground uppercase tracking-[0.14em]">
+      <p className="flex items-center gap-2 font-medium font-mono text-[0.6875rem] text-muted-foreground uppercase tracking-[0.14em]">
+        <LockKeyhole aria-hidden className="size-3.5" strokeWidth={2} />
         Protected area
       </p>
 
