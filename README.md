@@ -1,5 +1,8 @@
 # Next.js Template
 
+[![CI](https://github.com/ygcarvalh/nextjs-template/actions/workflows/ci.yml/badge.svg)](https://github.com/ygcarvalh/nextjs-template/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A clone-and-launch starter for scalable Next.js apps: App Router + TypeScript,
 Tailwind CSS v4 + shadcn/ui, Biome, Vitest, type-safe env, and dark mode — with a
 feature-based architecture, public and private route groups, and a test-first
