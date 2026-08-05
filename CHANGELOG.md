@@ -34,9 +34,13 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `lint-staged` on pre-commit, `commitlint` on commit-msg, and typecheck plus
   tests on pre-push.
 - `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, and this changelog.
+- CI and license badges in the README, plus screenshots of the landing page in
+  both themes, the notes board, sign-in, and the 404.
 
 ### Changed
 
+- Icons from `lucide-react`, which was already a dependency, now mark the
+  primary actions, the empty board, and both error states.
 - Redesigned the landing page, sign-in page, 404, and notes board. The palette
   and type scale live entirely in `src/app/globals.css`, so restyling means
   editing tokens rather than components.

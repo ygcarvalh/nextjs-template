@@ -41,15 +41,16 @@ src/features/<name>/
   components/
 ```
 
-Two rules hold this together:
+Two rules hold this together.
 
-1. **Components never import a feature's server layer.** Biome enforces this
-   through `noRestrictedImports`. Import a Server Action, call a route handler,
-   or take the data as a prop from a Server Component. Server Actions live in
-   `server/*-actions.ts` and are the one allowed exception.
-2. **Services depend on a port, never on a concrete store.** Swapping the
-   in-memory repository for a database should touch the adapter and one binding,
-   nothing else.
+Components must not import a feature's server layer, which Biome enforces
+through `noRestrictedImports`. Import a Server Action, call a route handler, or
+take the data as a prop from a Server Component instead. Server Actions live in
+`server/*-actions.ts` and are the one allowed exception.
+
+Services depend on a port rather than on a concrete store, so swapping the
+in-memory repository for a database should touch the adapter and one binding and
+nothing else.
 
 Route handlers under `src/app/api` are HTTP adapters. Authenticate, parse,
 delegate, map the result to a status code. Rules belong in the service.
@@ -61,9 +62,9 @@ Tests sit next to the code they cover. The extension picks the environment:
 - `*.test.ts` runs in node, for server code
 - `*.test.tsx` runs in jsdom, for components
 
-That split matters. `@t3-oss/env-nextjs` decides whether server variables are
-readable by checking for a `window`, so a server module tested under jsdom will
-refuse to hand over `SESSION_SECRET`.
+The split is load bearing. `@t3-oss/env-nextjs` decides whether server variables
+are readable by checking for a `window`, so a server module tested under jsdom
+refuses to hand over `SESSION_SECRET`.
 
 Coverage thresholds are enforced and sit just under the current numbers. Files
 excluded from coverage are the ones the Playwright suite covers for real: route

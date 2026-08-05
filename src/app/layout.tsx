@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const description = "A scalable Next.js starter with a verified toolchain, auth seam, and tests.";
+const description =
+  "A Next.js starter with public and private route groups, a replaceable auth seam, and a test suite that gates the build.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),

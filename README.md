@@ -173,7 +173,7 @@ invalid environment fails the build rather than production. Add new variables
 there and import from `@/env` for typed access. Set `SKIP_ENV_VALIDATION=1` to
 bypass validation.
 
-`NEXT_PUBLIC_APP_URL` is the single source of truth for the origin. It drives
+Everything that needs to know the origin reads `NEXT_PUBLIC_APP_URL`:
 `metadataBase`, `robots.txt`, the sitemap, whether the session cookie is `Secure`
 and `__Host-` prefixed, and whether the CSP sends `upgrade-insecure-requests`.
 Set it to your real https origin in production.

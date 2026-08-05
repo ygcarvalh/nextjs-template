@@ -2,7 +2,7 @@
   "name": "nextjs-template",
   "version": "0.1.0",
   "private": true,
-  "description": "A scalable Next.js starter with a verified toolchain, a swappable auth seam, and tests.",
+  "description": "A Next.js starter with public and private route groups, a replaceable auth seam, and a test suite that gates the build.",
   "license": "MIT",
   "packageManager": "pnpm@11.17.0",
   "engines": {
