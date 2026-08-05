@@ -34,7 +34,6 @@ test("creates a note and shows it", async ({ page }) => {
 
   await expect(page.getByText(text)).toBeVisible();
 
-  // Survives a reload — it really went to the server.
   await page.reload();
   await expect(page.getByText(text)).toBeVisible();
 });
@@ -57,7 +56,6 @@ test("rejects wrong credentials without leaving the page", async ({ page }) => {
   await page.getByLabel("Password").fill("definitely-not-the-password");
   await page.getByRole("button", { name: "Sign in" }).click();
 
-  // Scoped to the form: Next's route announcer is also role="alert".
   await expect(page.locator("form").getByRole("alert")).toContainText("don't match an account");
   await expect(page).toHaveURL(/\/login/);
 });
@@ -67,8 +65,6 @@ test("a hostile next parameter cannot redirect off-origin", async ({ page }) => 
 
   await signIn(page);
 
-  // Falls back to the in-app destination. What matters is that the origin
-  // never changes — the attacker-supplied host is discarded entirely.
   await expect(page).toHaveURL("/notes");
   expect(new URL(page.url()).host).toBe(new URL(baseURL).host);
 });
@@ -77,7 +73,7 @@ test("an unknown URL returns a real 404", async ({ page }) => {
   const response = await page.goto("/definitely-not-a-route");
 
   expect(response?.status()).toBe(404);
-  await expect(page.getByRole("heading", { name: /doesn't exist/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /nothing at this address/i })).toBeVisible();
 });
 
 test("serves the security headers on a real response", async ({ page }) => {

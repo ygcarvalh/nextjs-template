@@ -1,20 +1,24 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-// Raised by notFound() inside the protected area. Because it lives in the
-// route group, it renders within (protected)/layout.tsx — a signed-in visitor
-// keeps the app chrome and their session instead of landing on the marketing
-// 404 and wondering whether they were signed out.
 export default function ProtectedNotFound() {
   return (
     <div className="mx-auto w-full max-w-xl px-6 py-24">
-      <p className="font-mono text-muted-foreground text-xs uppercase tracking-widest">404</p>
-      <h1 className="mt-3 font-semibold text-3xl tracking-tight">We couldn&apos;t find that</h1>
-      <p className="mt-3 text-muted-foreground">
-        It may have been deleted, or it belongs to another account.
+      <p className="font-medium font-mono text-[0.6875rem] text-muted-foreground uppercase tracking-[0.14em]">
+        404
       </p>
-      <div className="mt-8">
-        <Link href="/notes" className={buttonVariants()}>
+
+      <h1 className="mt-5 text-balance font-semibold text-3xl leading-[1.1] tracking-[-0.03em]">
+        We couldn&apos;t find that.
+      </h1>
+
+      <p className="mt-5 text-muted-foreground leading-relaxed">
+        It may have been deleted, or it belongs to another account. You are still signed in.
+      </p>
+
+      <div className="mt-10">
+        <Link href="/notes" className={cn(buttonVariants())}>
           Back to notes
         </Link>
       </div>

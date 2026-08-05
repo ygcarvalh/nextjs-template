@@ -15,16 +15,21 @@ export default async function LoginPage({
   const { next } = await searchParams;
 
   return (
-    <div className="mx-auto w-full max-w-sm px-6 py-16">
-      <div className="mb-8 space-y-2">
-        <h1 className="font-semibold text-2xl tracking-tight">Sign in</h1>
-        <p className="text-muted-foreground text-sm">
-          The notes example is behind the gate. Use the seeded account from{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">.env.example</code>.
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-sm px-6 py-20 sm:py-28">
+      <p className="font-medium font-mono text-[0.6875rem] text-muted-foreground uppercase tracking-[0.14em]">
+        Protected area
+      </p>
 
-      <LoginForm next={safeRedirectPath(next, "/notes")} />
+      <h1 className="mt-4 font-semibold text-3xl tracking-[-0.03em]">Sign in</h1>
+
+      <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
+        The notes example sits behind the session gate. Use the seeded account from{" "}
+        <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">.env.example</code>.
+      </p>
+
+      <div className="mt-8">
+        <LoginForm next={safeRedirectPath(next, "/notes")} />
+      </div>
     </div>
   );
 }
