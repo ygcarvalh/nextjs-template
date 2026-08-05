@@ -5,11 +5,33 @@
 
 A clone-and-launch starter for scalable Next.js apps: App Router + TypeScript,
 Tailwind CSS v4 + shadcn/ui, Biome, Vitest, type-safe env, and dark mode — with a
-feature-based architecture, public and private route groups, and a test-first
-workflow.
+feature-based architecture and a test-first workflow.
 
-Every claim below is checked by a command you can run, and the landing page
-lists those commands.
+Everything the landing page claims about this repo is checked by a command you
+can run yourself, and it lists them.
+
+![The landing page, with a sticky ledger listing the repository's quality gates and the command behind each one](docs/screenshots/landing-light.png)
+
+<details>
+<summary>More screenshots</summary>
+
+The same page in dark mode. Both themes come from one token block in
+`src/app/globals.css`.
+
+![The landing page in dark mode](docs/screenshots/landing-dark.png)
+
+The notes example, behind the session gate. Covers are served through
+`next/image` from the one remote host the CSP allows.
+
+![The notes board, showing four notes with cover images](docs/screenshots/notes-light.png)
+
+Sign-in, and the 404 that any unmatched URL returns with a real 404 status.
+
+![The sign-in page](docs/screenshots/login-light.png)
+
+![The 404 page](docs/screenshots/not-found-light.png)
+
+</details>
 
 ## Stack
 
@@ -74,10 +96,10 @@ with an in-memory adapter, a service that scopes every read and write to the
 session owner, a thin Route Handler on top, and a client component that talks to
 it. Copy it to build new features.
 
-Two boundaries are enforced rather than documented. Components cannot import a
-feature's server layer (Biome's `noRestrictedImports`), and middleware is never
-the only thing checking a session — the protected layout and the route handler
-check it again.
+Two boundaries have tooling behind them. Biome's `noRestrictedImports` stops
+components importing a feature's server layer, and the session is checked twice:
+middleware redirects early, then the protected layout and the route handler
+check again before anything renders or returns.
 
 ## Requirements
 
