@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # The suite must not depend on a developer's .env.local. These are throwaway
+  # values that satisfy src/env.ts; nothing here is a real secret.
+  NEXT_PUBLIC_APP_URL: http://localhost:3000
+  SESSION_SECRET: ci-session-secret-at-least-32-characters
+  AUTH_DEMO_EMAIL: demo@example.com
+  AUTH_DEMO_PASSWORD: demo-password
+
+jobs:
+  verify:
+    name: Typecheck, lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test with coverage
+        run: pnpm test:coverage
+
+      - name: Build
+        run: pnpm build
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+  e2e:
+    name: End-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run end-to-end tests
+        run: pnpm test:e2e
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Fails the job on a moderate-or-worse advisory in shipped dependencies.
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level moderate
