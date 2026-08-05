@@ -8,8 +8,6 @@ const provider = {
 
 vi.mock("@/features/auth/server/cookie-session", () => ({ cookieSessionProvider: provider }));
 
-// Guards the composition point: the exported helpers must delegate to whichever
-// provider is bound, so swapping the adapter cannot silently bypass them.
 describe("session composition", () => {
   beforeEach(() => {
     provider.read.mockReset();

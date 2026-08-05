@@ -8,8 +8,6 @@ export interface RateLimitResult {
 export interface RateLimiterOptions {
   windowMs: number;
   max: number;
-  // Bounds memory. Once exceeded, expired buckets are swept; if that is not
-  // enough, the oldest are dropped.
   maxKeys?: number;
 }
 
@@ -17,11 +15,6 @@ export interface RateLimiter {
   check(key: string, now?: number): RateLimitResult;
 }
 
-// A fixed-window counter held in process memory.
-//
-// It only limits the instance it runs on. Behind more than one instance the
-// effective limit multiplies by the instance count, so anything load-bearing
-// wants a shared store (Redis, Upstash, Vercel KV) behind this same interface.
 export function createRateLimiter({
   windowMs,
   max,
@@ -35,7 +28,6 @@ export function createRateLimiter({
         buckets.delete(key);
       }
     }
-    // Map preserves insertion order, so the front is the least recently created.
     while (buckets.size > maxKeys) {
       const oldest = buckets.keys().next();
       if (oldest.done) {

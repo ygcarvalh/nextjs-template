@@ -1,8 +1,5 @@
 "use client";
 
-// The last resort: an error thrown by the root layout itself. It replaces the
-// whole document, so it must render its own <html> and <body> and cannot rely
-// on providers, fonts, or global styles.
 export default function GlobalError({
   error,
   reset,

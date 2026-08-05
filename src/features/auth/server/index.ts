@@ -1,5 +1,3 @@
-// Server-side surface of the auth slice. Client components must not import
-// from here — see the boundary rule in biome.json.
 export { verifyCredentials } from "@/features/auth/server/credentials";
 export { safeRedirectPath } from "@/features/auth/server/safe-redirect";
 export { createSession, destroySession, getSession } from "@/features/auth/server/session";

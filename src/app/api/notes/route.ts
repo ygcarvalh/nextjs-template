@@ -5,9 +5,6 @@ import { notesService } from "@/features/notes/server";
 import { createNoteSchema } from "@/features/notes/types";
 import { readJsonBody } from "@/lib/http";
 
-// An HTTP adapter and nothing else: authenticate, parse, delegate, map the
-// result to a status code. The rules live in the service.
-
 function unauthorized() {
   return NextResponse.json({ error: "Authentication required" }, { status: 401 });
 }
@@ -22,8 +19,6 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  // Middleware already rejected anonymous requests. Re-checking here means a
-  // middleware bypass still cannot write.
   const session = await getSession();
   if (!session) {
     return unauthorized();

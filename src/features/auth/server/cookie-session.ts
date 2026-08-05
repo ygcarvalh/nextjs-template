@@ -9,13 +9,6 @@ import {
 import type { SessionProvider } from "@/features/auth/server/session-provider";
 import { signSessionToken, verifySessionToken } from "@/features/auth/server/session-token";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// A development adapter. It proves the session round-trip is real — the cookie
-// is HMAC-signed and tamper-evident — but it authenticates against a single
-// seeded account and stores no users. Replace this file with an identity
-// provider before deploying; nothing outside it imports an implementation.
-// ─────────────────────────────────────────────────────────────────────────────
-
 export const cookieSessionProvider: SessionProvider = {
   async read() {
     const token = (await cookies()).get(SESSION_COOKIE_NAME)?.value;

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { verifyCredentials } from "@/features/auth/server/credentials";
 
-// Values come from `test.env` in vitest.config.ts.
 const VALID = { email: "demo@example.com", password: "demo-password" };
 
 describe("verifyCredentials", () => {

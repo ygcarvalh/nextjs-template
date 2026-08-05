@@ -11,6 +11,4 @@ export {
 } from "@/features/notes/server/notes-service";
 export { createInMemoryNotesRepository };
 
-// The composition point, mirroring features/auth/server/session.ts. Point this
-// at a database-backed repository and nothing upstream changes.
 export const notesService = createNotesService(createInMemoryNotesRepository());

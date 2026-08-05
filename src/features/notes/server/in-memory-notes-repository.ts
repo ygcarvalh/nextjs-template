@@ -1,13 +1,6 @@
 import type { NotesRepository } from "@/features/notes/server/notes-repository";
 import type { Note } from "@/features/notes/types";
 
-// A factory rather than a module-level array: every call owns its state, so
-// tests get a clean repository by constructing one instead of reaching into
-// module scope to reset a shared array.
-//
-// State lives in the process, which means it is lost on restart and is not
-// shared between instances. Fine for a demo, wrong for anything real — that is
-// exactly what the NotesRepository port is here to make easy to replace.
 export function createInMemoryNotesRepository(seed: readonly Note[] = []): NotesRepository {
   const notes: Note[] = [...seed];
 

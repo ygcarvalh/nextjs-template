@@ -19,7 +19,6 @@ describe("notes service", () => {
   let repository: NotesRepository;
   let service: NotesService;
 
-  // A fresh repository per test — no shared module state, so no reset hook.
   beforeEach(() => {
     repository = createInMemoryNotesRepository();
     service = createNotesService(repository);

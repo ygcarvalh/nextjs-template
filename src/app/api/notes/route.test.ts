@@ -10,8 +10,6 @@ function sessionFor(userId: string): Session {
   return { userId, email: `${userId}@example.com`, expiresAt: Date.now() + 60_000 };
 }
 
-// The service is composed as a module singleton, so each test loads a fresh
-// copy of the route rather than sharing notes between cases.
 async function loadRoute() {
   vi.resetModules();
   return import("@/app/api/notes/route");

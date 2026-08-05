@@ -13,7 +13,6 @@ vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => cookieStore),
 }));
 
-// Matches `test.env` in vitest.config.ts.
 const SECRET = "test-session-secret-at-least-32-characters";
 
 describe("cookieSessionProvider", () => {

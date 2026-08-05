@@ -21,8 +21,6 @@ describe("session cookie", () => {
   });
 
   it("drops the __Host- prefix on a plain http origin", async () => {
-    // A __Host- cookie without Secure is rejected outright, and Secure cannot
-    // be set over http — so http origins must use the unprefixed name.
     const { SESSION_COOKIE_NAME, sessionCookieOptions } =
       await loadCookieConfig("http://localhost:3000");
 

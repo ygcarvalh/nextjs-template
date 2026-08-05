@@ -56,7 +56,6 @@ describe("createRateLimiter", () => {
       limiter.check(`key-${index}`, index * 10);
     }
 
-    // Still enforcing for a live key after all that churn.
     limiter.check("live", 5000);
     expect(limiter.check("live", 5001).remaining).toBe(3);
   });

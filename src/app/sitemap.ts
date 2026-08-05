@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 import { env } from "@/env";
 
-// Only public, indexable routes belong here.
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {

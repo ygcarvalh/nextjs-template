@@ -1,9 +1,5 @@
 import { type Session, sessionSchema } from "@/features/auth/types";
 
-// Web Crypto, not node:crypto — middleware runs on the Edge runtime, where the
-// node built-in is unavailable. Keeping this module free of `next/headers` and
-// `server-only` is what lets middleware and the app share one implementation.
-
 const encoder = new TextEncoder();
 
 function toBase64Url(bytes: Uint8Array): string {
@@ -57,7 +53,6 @@ export async function verifySessionToken(
   }
 
   const key = await importKey(secret);
-  // crypto.subtle.verify compares in constant time.
   const isAuthentic = await crypto.subtle.verify(
     "HMAC",
     key,

@@ -6,9 +6,6 @@ import { safeRedirectPath } from "@/features/auth/server/safe-redirect";
 import { createSession, destroySession } from "@/features/auth/server/session";
 import { credentialsSchema } from "@/features/auth/types";
 
-// Server Actions carry a built-in origin check, so the sign-in POST gets CSRF
-// protection without a hand-rolled token.
-
 export type LoginState = { error: string | null };
 
 export async function login(_previous: LoginState, formData: FormData): Promise<LoginState> {
@@ -23,8 +20,6 @@ export async function login(_previous: LoginState, formData: FormData): Promise<
 
   const identity = await verifyCredentials(parsed.data);
   if (!identity) {
-    // Deliberately does not say which field was wrong — that would confirm
-    // whether an account exists.
     return { error: "Those credentials don't match an account." };
   }
 

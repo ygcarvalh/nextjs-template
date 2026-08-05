@@ -5,8 +5,6 @@ const baseURL = `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
-  // The demo repository is an in-process array shared by every request, so the
-  // suite runs serially. A real datastore would lift this restriction.
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
@@ -18,8 +16,6 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    // Against the production build, not the dev server — middleware, headers,
-    // and caching all behave differently there, and those are what we assert.
     command: `pnpm build && pnpm exec next start --port ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,

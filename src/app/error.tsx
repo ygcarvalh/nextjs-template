@@ -11,9 +11,6 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Replace with your error reporter. The digest is the only safe way to tie
-    // a user report back to a server log — the message itself is redacted in
-    // production and must not be shown.
     console.error(error);
   }, [error]);
 

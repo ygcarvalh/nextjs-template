@@ -6,7 +6,6 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // Everything behind the session gate, plus the sign-in page itself.
       disallow: ["/api/", "/login", "/notes"],
     },
     sitemap: new URL("/sitemap.xml", env.NEXT_PUBLIC_APP_URL).toString(),

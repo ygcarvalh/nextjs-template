@@ -4,25 +4,15 @@ import { SESSION_COOKIE_NAME } from "@/features/auth/server/session-cookie";
 import { verifySessionToken } from "@/features/auth/server/session-token";
 import { createRateLimiter } from "@/lib/rate-limit";
 
-// Middleware handles the *experience* of being signed out: it redirects early
-// and preserves where the visitor was heading. It is not the authorization
-// boundary — `(protected)/layout.tsx` and the route handlers re-check the
-// session, so a bypass here still renders nothing.
-
 const PROTECTED_PREFIXES = ["/notes"];
 const PROTECTED_API_PREFIXES = ["/api/notes"];
 
-// Deliberately not applied to /api/health, so uptime probes are never throttled.
 const limiter = createRateLimiter({ windowMs: 60_000, max: 60 });
 
 function matchesPrefix(pathname: string, prefixes: string[]): boolean {
   return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
-// There is no trustworthy client IP without a known proxy in front. These
-// headers are set by the platform edge (Vercel, Cloudflare, a load balancer);
-// if you self-host, make sure yours is the one writing them, because a client
-// can otherwise forge x-forwarded-for and get a fresh bucket per request.
 function clientKey(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
@@ -50,7 +40,6 @@ function tooManyRequests(resetAt: number, limit: number): NextResponse {
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  // Rate limit the endpoints that do work: the notes API and the sign-in POST.
   const isRateLimited =
     matchesPrefix(pathname, PROTECTED_API_PREFIXES) ||
     (pathname === "/login" && request.method === "POST");
