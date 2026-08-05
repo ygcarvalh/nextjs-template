@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-05
+
 ### Added
 
 - Public and private route groups. `(public)` holds the landing and sign-in pages; `(protected)` sits behind a session check and holds the notes example.
@@ -49,3 +51,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 
 - Initial template: Next.js App Router, TypeScript, Tailwind CSS v4, shadcn/ui, Biome, Vitest, next-themes, and a type-safe env module.
+
+[Unreleased]: https://github.com/ygcarvalh/nextjs-template/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/ygcarvalh/nextjs-template/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/ygcarvalh/nextjs-template/releases/tag/v0.1.0
