@@ -6,6 +6,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-05
+
+### Changed
+
+- Bumped `next` to 16.2.12, `react` and `react-dom` to 19.2.8, and `lucide-react` to 1.28.0.
+- Bumped the dev toolchain: `@biomejs/biome` to 2.5.6, `@vitejs/plugin-react` to 6.0.5, `shadcn` to 4.16.1, and `jsdom` to 30.0.1. The `jsdom` major only changes the test environment.
+
 ## [0.2.0] - 2026-08-05
 
 ### Added
@@ -52,6 +59,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - Initial template: Next.js App Router, TypeScript, Tailwind CSS v4, shadcn/ui, Biome, Vitest, next-themes, and a type-safe env module.
 
-[Unreleased]: https://github.com/ygcarvalh/nextjs-template/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/ygcarvalh/nextjs-template/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/ygcarvalh/nextjs-template/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/ygcarvalh/nextjs-template/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ygcarvalh/nextjs-template/releases/tag/v0.1.0
