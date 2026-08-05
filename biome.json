@@ -36,6 +36,30 @@
   },
   "overrides": [
     {
+      "includes": ["src/components/**", "src/features/*/components/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@/features/*/server",
+                      "@/features/*/server/**",
+                      "!@/features/*/server/*-actions"
+                    ],
+                    "message": "Components must not reach into a feature's server layer. Import a Server Action (features/*/server/*-actions), call a route handler, or take the data as a prop from a Server Component."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["src/components/ui/**"],
       "linter": { "enabled": false }
     }

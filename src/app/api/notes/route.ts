@@ -1,17 +1,49 @@
 import { NextResponse } from "next/server";
-import { addNote, listNotes } from "@/features/notes/server/notes-store";
+import { z } from "zod";
+import { getSession } from "@/features/auth/server";
+import { notesService } from "@/features/notes/server";
 import { createNoteSchema } from "@/features/notes/types";
+import { readJsonBody } from "@/lib/http";
 
-export function GET() {
-  return NextResponse.json({ notes: listNotes() });
+function unauthorized() {
+  return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+}
+
+export async function GET() {
+  const session = await getSession();
+  if (!session) {
+    return unauthorized();
+  }
+
+  return NextResponse.json({ notes: await notesService.list(session) });
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const parsed = createNoteSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid note" }, { status: 400 });
+  const session = await getSession();
+  if (!session) {
+    return unauthorized();
   }
-  const note = addNote(parsed.data.text);
-  return NextResponse.json({ note }, { status: 201 });
+
+  const body = await readJsonBody(request);
+  if (!body.ok) {
+    return body.response;
+  }
+
+  const parsed = createNoteSchema.safeParse(body.value);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid note", issues: z.flattenError(parsed.error).fieldErrors },
+      { status: 400 },
+    );
+  }
+
+  const result = await notesService.create(session, parsed.data);
+  if (!result.ok) {
+    return NextResponse.json(
+      { error: `You can keep at most ${result.limit} notes.` },
+      { status: 409 },
+    );
+  }
+
+  return NextResponse.json({ note: result.note }, { status: 201 });
 }

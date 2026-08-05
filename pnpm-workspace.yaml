@@ -1,3 +1,10 @@
 allowBuilds:
   sharp: true
   unrs-resolver: true
+
+# Transitive dependencies of `next` that ship with open advisories.
+# Both are pinned forward here rather than waiting on an upstream release.
+# Verified against `pnpm build`, `pnpm test`, and `pnpm audit --prod`.
+overrides:
+  postcss: ">=8.5.25"
+  sharp: ">=0.35.3"
