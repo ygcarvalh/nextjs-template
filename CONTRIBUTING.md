@@ -8,7 +8,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Node 20.9+ and pnpm 9+. `.nvmrc` and the `packageManager` field pin both.
+Node 22.13+ and pnpm 9+. `.nvmrc` and the `packageManager` field pin both.
 
 ## Before you push
 

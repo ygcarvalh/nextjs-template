@@ -103,7 +103,7 @@ check again before anything renders or returns.
 
 ## Requirements
 
-- Node.js 20.9+
+- Node.js 22.13+
 - pnpm 9+
 
 ## Setup
