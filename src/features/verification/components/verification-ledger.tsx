@@ -19,10 +19,10 @@ export function VerificationLedger() {
           >
             <dt className="text-sm">{gate.label}</dt>
             <dd className="font-medium font-mono text-pass text-sm tabular-nums">{gate.value}</dd>
-            <p className="col-span-2 mt-1 font-mono text-[0.6875rem] text-muted-foreground">
+            <dd className="col-span-2 mt-1 font-mono text-[0.6875rem] text-muted-foreground">
               <span className="select-none">$ </span>
               {gate.command}
-            </p>
+            </dd>
           </div>
         ))}
       </dl>

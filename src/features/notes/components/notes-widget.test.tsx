@@ -103,6 +103,34 @@ describe("NotesWidget", () => {
     expect(screen.queryByText("No notes yet")).not.toBeInTheDocument();
   });
 
+  it("falls back to a generic message when the error response has no body", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ notes: [] }))
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 502,
+        json: async () => {
+          throw new Error("not json");
+        },
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<NotesWidget />);
+    await userEvent.type(await screen.findByLabelText("Note text"), "note");
+    await userEvent.click(screen.getByRole("button", { name: "Add" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("The note could not be saved.");
+  });
+
+  it("reports a network failure while loading", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+
+    render(<NotesWidget />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("could not be loaded");
+  });
+
   it("does not submit an empty note", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ notes: [] }));
     vi.stubGlobal("fetch", fetchMock);
