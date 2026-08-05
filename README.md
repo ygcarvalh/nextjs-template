@@ -3,25 +3,20 @@
 [![CI](https://github.com/ygcarvalh/nextjs-template/actions/workflows/ci.yml/badge.svg)](https://github.com/ygcarvalh/nextjs-template/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A clone-and-launch starter for scalable Next.js apps: App Router + TypeScript,
-Tailwind CSS v4 + shadcn/ui, Biome, Vitest, type-safe env, and dark mode — with a
-feature-based architecture and a test-first workflow.
+A clone-and-launch starter for scalable Next.js apps: App Router + TypeScript, Tailwind CSS v4 + shadcn/ui, Biome, Vitest, type-safe env, and dark mode — with a feature-based architecture and a test-first workflow.
 
-Everything the landing page claims about this repo is checked by a command you
-can run yourself, and it lists them.
+Everything the landing page claims about this repo is checked by a command you can run yourself, and it lists them.
 
 ![The landing page, with a sticky ledger listing the repository's quality gates and the command behind each one](docs/screenshots/landing-light.png)
 
 <details>
 <summary>More screenshots</summary>
 
-The same page in dark mode. Both themes come from one token block in
-`src/app/globals.css`.
+The same page in dark mode. Both themes come from one token block in `src/app/globals.css`.
 
 ![The landing page in dark mode](docs/screenshots/landing-dark.png)
 
-The notes example, behind the session gate. Covers are served through
-`next/image` from the one remote host the CSP allows.
+The notes example, behind the session gate. Covers are served through `next/image` from the one remote host the CSP allows.
 
 ![The notes board, showing four notes with cover images](docs/screenshots/notes-light.png)
 
@@ -48,8 +43,7 @@ Sign-in, and the 404 that any unmatched URL returns with a real 404 status.
 
 ## Architecture
 
-Feature-based: each feature colocates its own components, server code, and tests.
-Shared building blocks live in top-level folders.
+Feature-based: each feature colocates its own components, server code, and tests. Shared building blocks live in top-level folders.
 
 ```
 middleware.ts                  # session gate, ?next= preservation, rate limit
@@ -91,15 +85,9 @@ src/
   env.ts                       # validated, typed environment variables
 ```
 
-The `notes` feature is the reference vertical slice: a `NotesRepository` port
-with an in-memory adapter, a service that scopes every read and write to the
-session owner, a thin Route Handler on top, and a client component that talks to
-it. Copy it to build new features.
+The `notes` feature is the reference vertical slice: a `NotesRepository` port with an in-memory adapter, a service that scopes every read and write to the session owner, a thin Route Handler on top, and a client component that talks to it. Copy it to build new features.
 
-Two boundaries have tooling behind them. Biome's `noRestrictedImports` stops
-components importing a feature's server layer, and the session is checked twice:
-middleware redirects early, then the protected layout and the route handler
-check again before anything renders or returns.
+Two boundaries have tooling behind them. Biome's `noRestrictedImports` stops components importing a feature's server layer, and the session is checked twice: middleware redirects early, then the protected layout and the route handler check again before anything renders or returns.
 
 ## Requirements
 
@@ -119,26 +107,19 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Open http://localhost:3000. The notes example lives at `/notes`, behind the gate.
-Sign in with the seeded credentials from `.env.example`.
+Open http://localhost:3000. The notes example lives at `/notes`, behind the gate. Sign in with the seeded credentials from `.env.example`.
 
 ## Authentication
 
-`src/features/auth/server/cookie-session.ts` is a development adapter. It signs
-a real, tamper-evident cookie, but it authenticates a single account from
-environment variables and stores no users.
+`src/features/auth/server/cookie-session.ts` is a development adapter. It signs a real, tamper-evident cookie, but it authenticates a single account from environment variables and stores no users.
 
-To use a real identity provider, write an adapter satisfying `SessionProvider`
-and change one binding in `src/features/auth/server/session.ts`. Nothing outside
-that file names an implementation.
+To use a real identity provider, write an adapter satisfying `SessionProvider` and change one binding in `src/features/auth/server/session.ts`. Nothing outside that file names an implementation.
 
 Read [SECURITY.md](SECURITY.md) before deploying.
 
 ## Test-driven development
 
-Vitest + Testing Library. Tests are colocated as siblings, and the extension
-picks the environment: `*.test.ts` runs in node for server code, `*.test.tsx`
-runs in jsdom for components.
+Vitest + Testing Library. Tests are colocated as siblings, and the extension picks the environment: `*.test.ts` runs in node for server code, `*.test.tsx` runs in jsdom for components.
 
 Red → green → refactor:
 
@@ -168,23 +149,13 @@ Copy the `notes` slice and rename:
 
 ## Environment variables
 
-Defined and validated in `src/env.ts`, which `next.config.ts` imports so an
-invalid environment fails the build rather than production. Add new variables
-there and import from `@/env` for typed access. Set `SKIP_ENV_VALIDATION=1` to
-bypass validation.
+Defined and validated in `src/env.ts`, which `next.config.ts` imports so an invalid environment fails the build rather than production. Add new variables there and import from `@/env` for typed access. Set `SKIP_ENV_VALIDATION=1` to bypass validation.
 
-Everything that needs to know the origin reads `NEXT_PUBLIC_APP_URL`:
-`metadataBase`, `robots.txt`, the sitemap, whether the session cookie is `Secure`
-and `__Host-` prefixed, and whether the CSP sends `upgrade-insecure-requests`.
-Set it to your real https origin in production.
+Everything that needs to know the origin reads `NEXT_PUBLIC_APP_URL`: `metadataBase`, `robots.txt`, the sitemap, whether the session cookie is `Secure` and `__Host-` prefixed, and whether the CSP sends `upgrade-insecure-requests`. Set it to your real https origin in production.
 
 ## Security
 
-Security headers are defined in `src/lib/security-headers.ts` and applied to
-every response. `POST /api/notes` returns 401 without a session, 415 for a
-non-JSON content type, 400 for a malformed body, 413 for an oversized one, and
-409 at the per-owner limit. The `?next=` parameter is filtered against
-open-redirect payloads.
+Security headers are defined in `src/lib/security-headers.ts` and applied to every response. `POST /api/notes` returns 401 without a session, 415 for a non-JSON content type, 400 for a malformed body, 413 for an oversized one, and 409 at the per-owner limit. The `?next=` parameter is filtered against open-redirect payloads.
 
 See [SECURITY.md](SECURITY.md) for what to change before deploying.
 
@@ -198,15 +169,11 @@ pnpm build       # production build
 pnpm verify      # typecheck + lint + coverage + build
 ```
 
-Hooks: `lint-staged` on pre-commit, `commitlint` on the commit message, and
-typecheck plus tests on pre-push. CI runs the same checks along with Playwright
-and `pnpm audit`.
+Hooks: `lint-staged` on pre-commit, `commitlint` on the commit message, and typecheck plus tests on pre-push. CI runs the same checks along with Playwright and `pnpm audit`.
 
 ## Styling
 
-Colors, radii, and fonts are tokens in `src/app/globals.css`. Restyling the
-template means editing that block, not the components. Tailwind CSS files and
-the generated `src/components/ui/**` are excluded from Biome.
+Colors, radii, and fonts are tokens in `src/app/globals.css`. Restyling the template means editing that block, not the components. Tailwind CSS files and the generated `src/components/ui/**` are excluded from Biome.
 
 ## Adding shadcn components
 
