@@ -11,10 +11,10 @@
   },
   "scripts": {
     "dev": "next dev",
-    "dev:logs": "mkdir -p logs && next dev 2>&1 | tee -a logs/web.jsonl",
+    "dev:logs": "mkdir -p ${DEV_LOG_DIR:-$HOME/.local/state/devlogs} && next dev 2>&1 | tee -a ${DEV_LOG_DIR:-$HOME/.local/state/devlogs}/${SERVICE_NAME:-$npm_package_name}.jsonl",
     "build": "next build",
     "start": "next start",
-    "start:logs": "mkdir -p logs && next start 2>&1 | tee -a logs/web.jsonl",
+    "start:logs": "mkdir -p ${DEV_LOG_DIR:-$HOME/.local/state/devlogs} && next start 2>&1 | tee -a ${DEV_LOG_DIR:-$HOME/.local/state/devlogs}/${SERVICE_NAME:-$npm_package_name}.jsonl",
     "lint": "biome check .",
     "format": "biome check --write .",
     "typecheck": "tsc --noEmit",
