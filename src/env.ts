@@ -9,6 +9,10 @@ export const env = createEnv({
     SESSION_SECRET: z.string().min(32),
     AUTH_DEMO_EMAIL: z.email(),
     AUTH_DEMO_PASSWORD: z.string().min(8),
+    METRICS_ENABLED: z
+      .enum(["true", "false"])
+      .default("true")
+      .transform((value) => value === "true"),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.url().default("http://localhost:3000"),
@@ -18,6 +22,7 @@ export const env = createEnv({
     SESSION_SECRET: process.env.SESSION_SECRET,
     AUTH_DEMO_EMAIL: process.env.AUTH_DEMO_EMAIL,
     AUTH_DEMO_PASSWORD: process.env.AUTH_DEMO_PASSWORD,
+    METRICS_ENABLED: process.env.METRICS_ENABLED,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
   emptyStringAsUndefined: true,
