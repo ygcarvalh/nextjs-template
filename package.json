@@ -29,7 +29,7 @@
     "*.{ts,tsx,js,jsx,json,jsonc,md}": "biome check --write --no-errors-on-unmatched"
   },
   "dependencies": {
-    "@base-ui/react": "^1.6.0",
+    "@base-ui/react": "^1.7.0",
     "@t3-oss/env-nextjs": "^0.13.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
