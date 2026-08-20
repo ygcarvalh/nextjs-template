@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { coverForNote } from "@/features/notes/covers";
 import type { Note } from "@/features/notes/types";
+import { REQUEST_ID_HEADER, sanitizeRequestId } from "@/lib/request-id";
 
 const dateFormat = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -17,11 +18,16 @@ const dateFormat = new Intl.DateTimeFormat("en-US", {
 
 type Status = "loading" | "ready" | "failed";
 
+function referenceOf(response: Response): string | null {
+  return sanitizeRequestId(response.headers.get(REQUEST_ID_HEADER));
+}
+
 export function NotesWidget() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [status, setStatus] = useState<Status>("loading");
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [reference, setReference] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const inputId = useId();
   const errorId = useId();
@@ -30,6 +36,7 @@ export function NotesWidget() {
     try {
       const response = await fetch("/api/notes");
       if (!response.ok) {
+        setReference(referenceOf(response));
         setStatus("failed");
         return;
       }
@@ -54,6 +61,7 @@ export function NotesWidget() {
 
     setIsSaving(true);
     setError(null);
+    setReference(null);
 
     try {
       const response = await fetch("/api/notes", {
@@ -64,6 +72,7 @@ export function NotesWidget() {
 
       if (!response.ok) {
         const body = await response.json().catch(() => null);
+        setReference(referenceOf(response));
         setError(body?.error ?? "The note could not be saved.");
         return;
       }
@@ -111,6 +120,7 @@ export function NotesWidget() {
         >
           <CircleAlert aria-hidden className="size-4 shrink-0" />
           {error}
+          {reference ? <span className="font-mono text-xs">Reference: {reference}</span> : null}
         </p>
       ) : null}
 
@@ -124,6 +134,7 @@ export function NotesWidget() {
         <p className="mt-8 flex items-center gap-2 text-destructive text-sm" role="alert">
           <CircleAlert aria-hidden className="size-4 shrink-0" />
           Your notes could not be loaded. Reload the page to try again.
+          {reference ? <span className="font-mono text-xs">Reference: {reference}</span> : null}
         </p>
       ) : null}
 

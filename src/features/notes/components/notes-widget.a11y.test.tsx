@@ -10,7 +10,12 @@ afterEach(() => {
 function stubNotes(notes: unknown[]) {
   vi.stubGlobal(
     "fetch",
-    vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ notes }) }),
+    vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+      json: async () => ({ notes }),
+    }),
   );
 }
 
