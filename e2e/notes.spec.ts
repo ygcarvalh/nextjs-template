@@ -85,3 +85,17 @@ test("serves the security headers on a real response", async ({ page }) => {
   expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   expect(headers).not.toHaveProperty("x-powered-by");
 });
+
+test("every response carries a correlation id the browser can read", async ({ page }) => {
+  const first = await page.goto("/");
+  const second = await page.goto("/");
+
+  const firstId = first?.headers()["x-request-id"];
+  const secondId = second?.headers()["x-request-id"];
+
+  expect(firstId).toMatch(/^[A-Za-z0-9_-]{1,64}$/);
+  expect(secondId).not.toBe(firstId);
+
+  const cookie = (await page.context().cookies()).find((entry) => entry.name === "x-request-id");
+  expect(cookie?.value).toBe(secondId);
+});

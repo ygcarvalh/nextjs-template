@@ -4,12 +4,13 @@ import { getSession } from "@/features/auth/server";
 import { notesService } from "@/features/notes/server";
 import { createNoteSchema } from "@/features/notes/types";
 import { readJsonBody } from "@/lib/http";
+import { withRouteLogging } from "@/lib/with-route-logging";
 
 function unauthorized() {
   return NextResponse.json({ error: "Authentication required" }, { status: 401 });
 }
 
-export async function GET() {
+async function handleGet() {
   const session = await getSession();
   if (!session) {
     return unauthorized();
@@ -18,7 +19,7 @@ export async function GET() {
   return NextResponse.json({ notes: await notesService.list(session) });
 }
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const session = await getSession();
   if (!session) {
     return unauthorized();
@@ -47,3 +48,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ note: result.note }, { status: 201 });
 }
+
+export const GET = withRouteLogging("/api/notes", handleGet);
+export const POST = withRouteLogging("/api/notes", handlePost);

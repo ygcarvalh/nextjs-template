@@ -11,8 +11,10 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:logs": "mkdir -p logs && next dev 2>&1 | tee -a logs/web.jsonl",
     "build": "next build",
     "start": "next start",
+    "start:logs": "mkdir -p logs && next start 2>&1 | tee -a logs/web.jsonl",
     "lint": "biome check .",
     "format": "biome check --write .",
     "typecheck": "tsc --noEmit",
