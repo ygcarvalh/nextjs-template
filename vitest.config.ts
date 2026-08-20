@@ -39,6 +39,7 @@ export default defineConfig({
       AUTH_DEMO_EMAIL: "demo@example.com",
       AUTH_DEMO_PASSWORD: "demo-password",
       NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+      LOG_LEVEL: "silent",
     },
     projects: [
       {

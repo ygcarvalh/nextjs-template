@@ -5,6 +5,7 @@ import { MAX_NOTES_PER_OWNER } from "@/features/notes/server/notes-service";
 const getSessionMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/features/auth/server", () => ({ getSession: getSessionMock }));
+vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 
 function sessionFor(userId: string): Session {
   return { userId, email: `${userId}@example.com`, expiresAt: Date.now() + 60_000 };

@@ -14,8 +14,13 @@ function note(overrides: Partial<Note> = {}): Note {
   };
 }
 
-function jsonResponse(body: unknown, ok = true, status = 200) {
-  return { ok, status, json: async () => body };
+function jsonResponse(body: unknown, ok = true, status = 200, requestId = "req-abc123") {
+  return {
+    ok,
+    status,
+    headers: new Headers({ "x-request-id": requestId }),
+    json: async () => body,
+  };
 }
 
 describe("NotesWidget", () => {
@@ -110,6 +115,7 @@ describe("NotesWidget", () => {
       .mockResolvedValueOnce({
         ok: false,
         status: 502,
+        headers: new Headers({ "x-request-id": "req-abc123" }),
         json: async () => {
           throw new Error("not json");
         },

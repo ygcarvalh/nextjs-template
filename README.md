@@ -46,7 +46,8 @@ Sign-in, and the 404 that any unmatched URL returns with a real 404 status.
 Feature-based: each feature colocates its own components, server code, and tests. Shared building blocks live in top-level folders.
 
 ```
-middleware.ts                  # session gate, ?next= preservation, rate limit
+middleware.ts                  # correlation id, session gate, ?next=, rate limit
+instrumentation.ts             # server-boot hook: logger and metrics
 src/
   app/
     (public)/                  # marketing chrome
@@ -57,6 +58,7 @@ src/
       notes/page.tsx           # /notes
       not-found.tsx            # 404 inside the app shell
     api/health/route.ts        # GET /api/health
+    api/metrics/route.ts       # GET /api/metrics, for Prometheus
     api/notes/route.ts         # GET/POST /api/notes
     not-found.tsx              # 404 for any unmatched URL
     error.tsx, global-error.tsx, loading.tsx
@@ -82,6 +84,8 @@ src/
     ui/                        # shadcn primitives (generated; excluded from lint)
   lib/
     security-headers.ts, http.ts, rate-limit.ts, utils.ts
+    logger.ts, metrics.ts, with-route-logging.ts
+    request-id.ts, request-context.ts, request-id-client.ts
   env.ts                       # validated, typed environment variables
 ```
 
@@ -109,6 +113,8 @@ pnpm dev
 
 Open http://localhost:3000. The notes example lives at `/notes`, behind the gate. Sign in with the seeded credentials from `.env.example`.
 
+`pnpm dev:logs` runs the same server and tees everything into the shared log directory the search stack reads. See [Observability](#observability).
+
 ## Authentication
 
 `src/features/auth/server/cookie-session.ts` is a development adapter. It signs a real, tamper-evident cookie, but it authenticates a single account from environment variables and stores no users.
@@ -116,6 +122,45 @@ Open http://localhost:3000. The notes example lives at `/notes`, behind the gate
 To use a real identity provider, write an adapter satisfying `SessionProvider` and change one binding in `src/features/auth/server/session.ts`. Nothing outside that file names an implementation.
 
 Read [SECURITY.md](SECURITY.md) before deploying.
+
+## Observability
+
+Every request carries a correlation ID, and every log line is one JSON object. Given an ID, you can read the whole request.
+
+`middleware.ts` mints the ID. A caller that already sent `x-request-id` keeps it, which is how an upstream service or a native client stitches its logs to these; anyone else gets a fresh one. Inbound values are checked against `[A-Za-z0-9_-]{1,64}` and replaced when they fail, because a header is untrusted input and a newline in it would forge log lines.
+
+The ID leaves in three directions: forwarded on the request so route handlers see it, set on the response header so a `fetch` caller can read it, and dropped in a readable `x-request-id` cookie so the client error boundary can quote it without a round trip. A cookie rather than a `<meta>` tag, because reading `headers()` in the root layout would cost the landing page its static rendering.
+
+Two loggers write, because the edge runtime cannot run pino:
+
+- `middleware.ts` writes one `request.received` line per request with a hand-built `console.log(JSON.stringify(...))`. This is the only record of a page load.
+- `src/lib/logger.ts` is pino, for everything in the Node runtime. `withRouteLogging` wraps a route handler and writes one `request` line with the status and duration. `AsyncLocalStorage` carries the ID, so no call site has to pass it.
+
+```json
+{"level":"info","timestamp":"2026-08-20T20:29:45.997Z","service":"nextjs-template","request_id":"single-sink-002","method":"GET","path":"/api/health","status_code":200,"duration_ms":0.304,"event":"request"}
+```
+
+Lines record method, path, status, duration, client IP and the correlation ID, and nothing else. No request body, no query values, no headers. There is no redaction list to maintain because nothing sensitive is captured in the first place.
+
+`LOG_FORMAT=console` swaps the JSON for a readable stream while you work. `LOG_FILE` adds a file sink on top of stdout, for a platform that wants one.
+
+Prometheus metrics are served at `/api/metrics`, from `prom-client`. Set `METRICS_ENABLED=false` to withdraw the route. The counters live in the process, so behind more than one Node worker each reports only its own share.
+
+### Searching the logs
+
+This template writes the logs and serves the metrics. Storing and searching them is somebody else's job, because a per-project Loki means a per-project Grafana and one query per service when you are chasing an ID across two of them.
+
+The companion `devstack` repository runs Loki, Grafana, Alloy and Prometheus once for every project on the machine. Run the app with `pnpm dev:logs` and its output lands in `~/.local/state/devlogs/`, which is where that stack looks:
+
+```bash
+pnpm dev:logs        # writes ~/.local/state/devlogs/<package name>.jsonl
+```
+
+Set `DEV_LOG_DIR` to write somewhere else. Then register `/api/metrics` by dropping one file into that repository's `prometheus/targets/`; its README has the details.
+
+**Set `SERVICE_NAME` in `.env.local` when you derive a project from this template.** It becomes the `service` label in Loki and the filter in every query, so `jobtrail-web` and `loreweave-web` sharing the default name would collapse into one stream.
+
+Without `devstack` everything still works: `pnpm dev` prints the same JSON, and `jq` reads it.
 
 ## Test-driven development
 
@@ -155,7 +200,7 @@ Everything that needs to know the origin reads `NEXT_PUBLIC_APP_URL`: `metadataB
 
 ## Security
 
-Security headers are defined in `src/lib/security-headers.ts` and applied to every response. `POST /api/notes` returns 401 without a session, 415 for a non-JSON content type, 400 for a malformed body, 413 for an oversized one, and 409 at the per-owner limit. The `?next=` parameter is filtered against open-redirect payloads.
+Security headers are defined in `src/lib/security-headers.ts` and applied to every response. `POST /api/notes` returns 401 without a session, 415 for a non-JSON content type, 400 for a malformed body, 413 for an oversized one, and 409 at the per-owner limit. The `?next=` parameter is filtered against open-redirect payloads, and an inbound `x-request-id` is filtered before it reaches a log line.
 
 See [SECURITY.md](SECURITY.md) for what to change before deploying.
 

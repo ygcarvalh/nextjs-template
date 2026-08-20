@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { currentRequestId } from "@/lib/request-id-client";
+
 export default function GlobalError({
   error,
   reset,
@@ -7,6 +10,14 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [requestId, setRequestId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRequestId(currentRequestId());
+  }, []);
+
+  const reference = requestId ?? error.digest;
+
   return (
     <html lang="en">
       <body
@@ -25,9 +36,9 @@ export default function GlobalError({
             This is a root-level failure. Reloading may help; if it persists the deployment needs
             attention.
           </p>
-          {error.digest ? (
+          {reference ? (
             <p style={{ color: "#5b6673", fontFamily: "monospace", fontSize: "0.75rem" }}>
-              Reference: {error.digest}
+              Reference: {reference}
             </p>
           ) : null}
           <button
