@@ -12,11 +12,11 @@ Every response carries a CSP, HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Opt
 
 The session cookie is HMAC signed with Web Crypto, `httpOnly`, `sameSite=lax`, and carries an expiry that is checked on every read. Middleware redirects anonymous visitors, but it is not the authorization boundary: `(protected)/layout.tsx` and the notes route handler both check the session again, so a bypass at the middleware layer still renders and returns nothing.
 
-An inbound `x-request-id` is filtered before it reaches a log line or a cookie. `src/lib/request-id.ts` accepts at most 64 characters of `[A-Za-z0-9_-]` and mints a fresh id for anything else, because the header is caller-controlled: a newline in it would let that caller write forged entries into the log stream, and the value is echoed back in a response header and a readable cookie.
+An inbound `x-request-id` is filtered before it reaches a log line or a cookie. `src/lib/request-id.ts` accepts at most 64 characters of `[A-Za-z0-9_-]` and mints a fresh ID for anything else, because the header is caller-controlled: a newline in it would let that caller write forged entries into the log stream, and the value is echoed back in a response header and a readable cookie.
 
-Request logs record metadata only. Both the edge line in `middleware.ts` and the route line in `src/lib/with-route-logging.ts` carry method, path, status, duration, client IP, and correlation id. No request body, no query values, no headers, no cookies. There is no redaction list to maintain because nothing sensitive is captured in the first place.
+Request logs record metadata only. Both the edge line in `middleware.ts` and the route line in `src/lib/with-route-logging.ts` carry method, path, status, duration, client IP, and correlation ID. Bodies, query values, headers, and cookies never reach either one, so the template ships no redaction list and does not need one.
 
-The `x-request-id` cookie is deliberately readable by scripts. It holds an opaque per-request identifier and nothing else, and the client error boundary reads it to show the user a reference they can quote. Marking it `httpOnly` would defeat its only purpose; it grants no access and carries no session state.
+The `x-request-id` cookie is deliberately readable by scripts. It holds nothing but an opaque per-request identifier, which the client error boundary reads to show the user a reference they can quote. Marking it `httpOnly` would defeat its only purpose; it grants no access and carries no session state.
 
 Request bodies are size capped, content-type checked, and parsed through zod, so a malformed body produces a 400 instead of an unhandled 500. The `?next=` parameter is filtered down to same-origin absolute paths. Protocol-relative, backslash-smuggled, and control-character payloads all fall back to a safe path.
 

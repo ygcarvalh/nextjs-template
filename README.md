@@ -125,7 +125,7 @@ Read [SECURITY.md](SECURITY.md) before deploying.
 
 ## Observability
 
-Every request carries a correlation ID, and every log line is one JSON object. Given an ID, you can read the whole request.
+Every request carries a correlation ID, and every log line is one JSON object that includes it. A user who quotes the reference off an error screen has handed you everything you need to find the request.
 
 `middleware.ts` mints the ID. A caller that already sent `x-request-id` keeps it, which is how an upstream service or a native client stitches its logs to these; anyone else gets a fresh one. Inbound values are checked against `[A-Za-z0-9_-]{1,64}` and replaced when they fail, because a header is untrusted input and a newline in it would forge log lines.
 
@@ -140,7 +140,7 @@ Two loggers write, because the edge runtime cannot run pino:
 {"level":"info","timestamp":"2026-08-20T20:29:45.997Z","service":"nextjs-template","request_id":"single-sink-002","method":"GET","path":"/api/health","status_code":200,"duration_ms":0.304,"event":"request"}
 ```
 
-Lines record method, path, status, duration, client IP and the correlation ID, and nothing else. No request body, no query values, no headers. There is no redaction list to maintain because nothing sensitive is captured in the first place.
+Lines record method, path, status, duration, client IP and the correlation ID. Bodies, query values and headers stay out, so there is no redaction list to keep current.
 
 `LOG_FORMAT=console` swaps the JSON for a readable stream while you work. `LOG_FILE` adds a file sink on top of stdout, for a platform that wants one.
 
@@ -148,7 +148,7 @@ Prometheus metrics are served at `/api/metrics`, from `prom-client`. Set `METRIC
 
 ### Searching the logs
 
-This template writes the logs and serves the metrics. Storing and searching them is somebody else's job, because a per-project Loki means a per-project Grafana and one query per service when you are chasing an ID across two of them.
+This template writes the logs and serves the metrics; something else has to store and search them. One Loki per project also means one Grafana per project, and two queries every time an ID crosses a service boundary.
 
 The companion `devstack` repository runs Loki, Grafana, Alloy and Prometheus once for every project on the machine. Run the app with `pnpm dev:logs` and its output lands in `~/.local/state/devlogs/`, which is where that stack looks:
 
@@ -158,7 +158,7 @@ pnpm dev:logs        # writes ~/.local/state/devlogs/<package name>.jsonl
 
 Set `DEV_LOG_DIR` to write somewhere else. Then register `/api/metrics` by dropping one file into that repository's `prometheus/targets/`; its README has the details.
 
-**Set `SERVICE_NAME` in `.env.local` when you derive a project from this template.** It becomes the `service` label in Loki and the filter in every query, so `jobtrail-web` and `loreweave-web` sharing the default name would collapse into one stream.
+Set `SERVICE_NAME` in `.env.local` when you derive a project from this template. It becomes the `service` label in Loki and the filter in every query, so `jobtrail-web` and `loreweave-web` left on the default name would collapse into one stream.
 
 Without `devstack` everything still works: `pnpm dev` prints the same JSON, and `jq` reads it.
 
