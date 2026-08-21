@@ -1,0 +1,12 @@
+pnpm typecheck
+pnpm test
+
+# The browser suite is the only one that catches a control that renders but does
+# nothing, so it runs whenever it can. It needs the sibling API, and refusing to
+# push because that is not running would only teach people to skip the hook.
+API_HEALTH="${API_URL:-http://127.0.0.1:8000/api/v1}"
+if curl --silent --fail --max-time 2 "${API_HEALTH%/api/v1}/health" > /dev/null 2>&1; then
+  pnpm test:e2e
+else
+  echo "pre-push: skipping the browser suite, the API at $API_HEALTH is not answering"
+fi

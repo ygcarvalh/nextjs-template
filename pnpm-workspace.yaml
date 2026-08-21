@@ -1,0 +1,12 @@
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+
+# Transitive dependencies of `next` that ship with open advisories.
+# They are pinned forward here rather than waiting on an upstream release.
+# nanoid stays on its 3.x line: postcss wants ^3.3.17, and nanoid 4 is ESM only.
+# Verified against `pnpm build`, `pnpm test`, and `pnpm audit --prod`.
+overrides:
+  nanoid: "^3.3.18"
+  postcss: ">=8.5.25"
+  sharp: ">=0.35.3"
