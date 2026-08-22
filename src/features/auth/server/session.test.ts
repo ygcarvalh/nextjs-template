@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const provider = vi.hoisted(() => ({
   read: vi.fn(),
   create: vi.fn(),
+  register: vi.fn(),
   destroy: vi.fn(),
 }));
 
@@ -33,6 +34,15 @@ describe("session composition", () => {
     await createSession(credentials);
 
     expect(provider.create).toHaveBeenCalledWith(credentials);
+  });
+
+  it("registers through the bound provider", async () => {
+    const { registerAccount } = await import("@/features/auth/server/session");
+    const registration = { email: "ada@example.com", password: "secret", name: "Ada" };
+
+    await registerAccount(registration);
+
+    expect(provider.register).toHaveBeenCalledWith(registration);
   });
 
   it("destroys through the bound provider", async () => {

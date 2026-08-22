@@ -1,5 +1,6 @@
 import { LockKeyhole } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LoginForm } from "@/features/auth";
 import { safeRedirectPath } from "@/features/auth/server";
 import { getDictionary } from "@/i18n/server";
@@ -32,6 +33,13 @@ export default async function LoginPage({
       <div className="mt-8">
         <LoginForm next={safeRedirectPath(next, "/notes")} />
       </div>
+
+      <p className="mt-8 text-muted-foreground text-sm">
+        {t.login.noAccount}{" "}
+        <Link href="/register" className="text-foreground underline underline-offset-4">
+          {t.login.register}
+        </Link>
+      </p>
     </div>
   );
 }

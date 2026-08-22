@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { apiSessionProvider } from "@/features/auth/server/api-session";
 import type { SessionProvider } from "@/features/auth/server/session-provider";
-import type { Credentials } from "@/features/auth/types";
+import type { Credentials, Registration } from "@/features/auth/types";
 
 const provider: SessionProvider = apiSessionProvider;
 
@@ -11,6 +11,10 @@ export const getSession = cache(() => provider.read());
 
 export function createSession(credentials: Credentials) {
   return provider.create(credentials);
+}
+
+export function registerAccount(registration: Registration) {
+  return provider.register(registration);
 }
 
 export function destroySession() {

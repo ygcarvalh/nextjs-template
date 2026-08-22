@@ -52,6 +52,7 @@ src/
     (public)/                  # marketing chrome
       page.tsx                 # /
       login/page.tsx           # /login
+      register/page.tsx        # /register
     (protected)/               # session required
       layout.tsx               # re-checks the session, then renders the chrome
       notes/page.tsx           # /notes
@@ -75,9 +76,12 @@ src/
         token-exchange.ts      # login and refresh against the API, edge safe
         tokens.ts              # the two httpOnly cookies
         jwt-claims.ts          # reads exp; never verifies
-        auth-actions.ts        # sign in / sign out (Server Actions)
+        auth-actions.ts        # sign in / sign up / sign out (Server Actions)
         safe-redirect.ts       # open-redirect guard
+      password-strength.ts     # the advisory reading behind the meter
       components/login-form.tsx
+      components/register-form.tsx
+      components/password-meter.tsx
     preferences/               # locale, theme and the toast reference, per account
     settings/                  # the settings screen and its writes
     requests/                  # the request log screen
@@ -131,7 +135,9 @@ Open http://localhost:3000. The notes example lives at `/notes`, behind the gate
 
 ## Authentication
 
-Sign-in goes to the sibling `fastapi-template`, which is the only thing that verifies a password. Point `API_URL` at it and seed an account there; there is no demo account in this repository any more.
+Sign-in goes to the sibling `fastapi-template`, which is the only thing that verifies a password. Point `API_URL` at it and seed an account there, or open one at `/register`; there is no demo account in this repository any more.
+
+Signing up is `POST /users` followed by the ordinary sign-in, so a newcomer never meets a form they have nothing to type into yet. Rate limiting and the refusal of an address that already has an account both come from the API. The meter beside the password box reads length and character variety and nothing else — it does not know a famous password when it sees one, and the floor the form enforces is still the API's eight characters.
 
 The browser never sees a token. `POST /auth/login` returns an access and a refresh token, and both are stored as httpOnly cookies on this side (`src/features/auth/server/tokens.ts`), so every call to the API is made by a server component, a Server Action, or a route handler — which is also why the CSP can keep `connect-src 'self'`.
 
@@ -271,7 +277,7 @@ Everything that needs to know the origin reads `NEXT_PUBLIC_APP_URL`: `metadataB
 
 Security headers are defined in `src/lib/security-headers.ts` and applied to every response. `POST /api/notes` returns 401 without a session, 415 for a non-JSON content type, 400 for a malformed body, 413 for an oversized one, and 409 at the per-owner limit. The `?next=` parameter is filtered against open-redirect payloads, and an inbound `x-request-id` is filtered before it reaches a log line.
 
-The gate in `src/proxy.ts` denies by default: everything that is not named in `PUBLIC_PAGES` or `PUBLIC_API` needs a session, so a screen added next month is protected by forgetting rather than by remembering. It rate-limits gated API paths and the sign-in POST, and deliberately leaves Server Actions alone: a 429 is not an answer a Server Action can give, so React receives a body it cannot read and the form stays pending forever. The endpoints worth throttling are throttled by the API, which can answer with a message. One consequence worth knowing: a signed-out visitor who types an unknown URL is bounced to sign-in rather than shown the 404.
+The gate in `src/proxy.ts` denies by default: everything that is not named in `PUBLIC_PAGES` or `PUBLIC_API` needs a session, so a screen added next month is protected by forgetting rather than by remembering. It rate-limits gated API paths and both credential POSTs, sign-in and sign-up, and deliberately leaves every other Server Action alone: a 429 is not an answer a Server Action can give, so React receives a body it cannot read and the form stays pending forever. The endpoints worth throttling are throttled by the API, which can answer with a message. One consequence worth knowing: a signed-out visitor who types an unknown URL is bounced to sign-in rather than shown the 404.
 
 See [SECURITY.md](SECURITY.md) for what to change before deploying.
 

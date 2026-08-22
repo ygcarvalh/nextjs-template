@@ -68,7 +68,7 @@ describe("the correlation id", () => {
 });
 
 describe("the gate", () => {
-  it.each(["/", "/login"])("lets an anonymous visitor read %s", async (path) => {
+  it.each(["/", "/login", "/register"])("lets an anonymous visitor read %s", async (path) => {
     const response = await proxy(request(path));
 
     expect(response.status).toBe(200);
@@ -113,6 +113,13 @@ describe("the gate", () => {
 
   it("sends a signed-in visitor away from the sign-in page", async () => {
     const response = await proxy(request("/login", { cookies: `access=${FRESH}` }));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost:3000/notes");
+  });
+
+  it("sends a signed-in visitor away from the sign-up page too", async () => {
+    const response = await proxy(request("/register", { cookies: `access=${FRESH}` }));
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost:3000/notes");
@@ -204,6 +211,20 @@ describe("the rate limit", () => {
     }
 
     expect(attempts.every((answer) => answer.status === 200)).toBe(true);
+  });
+
+  it("throttles sign-up as tightly as sign-in", async () => {
+    const attempts = [];
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      attempts.push(
+        await proxy(
+          request("/register", { method: "POST", headers: { "x-real-ip": "10.0.0.12" } }),
+        ),
+      );
+    }
+
+    expect(attempts[9]?.status).toBe(200);
+    expect(attempts.at(-1)?.status).toBe(429);
   });
 
   it("throttles credential posts sooner", async () => {

@@ -3,6 +3,7 @@ import { ApiError } from "@/lib/api-client";
 
 const {
   apiGet,
+  apiSend,
   readTokens,
   writeTokens,
   clearTokens,
@@ -11,6 +12,7 @@ const {
   outboundRequestId,
 } = vi.hoisted(() => ({
   apiGet: vi.fn(),
+  apiSend: vi.fn(),
   readTokens: vi.fn<() => Promise<{ access: string | null; refresh: string | null }>>(),
   writeTokens: vi.fn<() => Promise<void>>(),
   clearTokens: vi.fn<() => Promise<void>>(),
@@ -21,7 +23,7 @@ const {
 
 vi.mock("@/lib/api-client", async () => {
   const actual = await vi.importActual<typeof import("@/lib/api-client")>("@/lib/api-client");
-  return { ApiError: actual.ApiError, apiGet };
+  return { ApiError: actual.ApiError, apiGet, apiSend };
 });
 vi.mock("@/features/auth/server/tokens", () => ({ readTokens, writeTokens, clearTokens }));
 vi.mock("@/features/auth/server/token-exchange", () => ({ exchangeCredentials, revokeRefresh }));
@@ -98,6 +100,56 @@ describe("apiSessionProvider", () => {
       apiSessionProvider.create({ email: "ada@example.com", password: "wrong" }),
     ).resolves.toBeNull();
     expect(writeTokens).not.toHaveBeenCalled();
+  });
+
+  it("creates the account and opens its first session in the same call", async () => {
+    apiSend.mockResolvedValue({ id: 7 });
+    exchangeCredentials.mockResolvedValue({ access_token: "a", refresh_token: "r" });
+    apiGet.mockResolvedValue(user);
+
+    await expect(
+      apiSessionProvider.register({ email: "ada@example.com", password: "secret", name: "Ada" }),
+    ).resolves.toMatchObject({ email: "ada@example.com" });
+
+    expect(apiSend).toHaveBeenCalledWith("POST", "/users", {
+      email: "ada@example.com",
+      password: "secret",
+      name: "Ada",
+    });
+  });
+
+  it("names a taken address for what it is", async () => {
+    apiSend.mockRejectedValue(new ApiError(409, "Email already registered", null));
+
+    await expect(
+      apiSessionProvider.register({ email: "ada@example.com", password: "secret" }),
+    ).resolves.toEqual({ refused: "taken" });
+    expect(exchangeCredentials).not.toHaveBeenCalled();
+  });
+
+  it("keeps every other API refusal vague", async () => {
+    apiSend.mockRejectedValue(new ApiError(429, "Too many requests", null));
+
+    await expect(
+      apiSessionProvider.register({ email: "ada@example.com", password: "secret" }),
+    ).resolves.toEqual({ refused: "unavailable" });
+  });
+
+  it("refuses when the account is created but will not open", async () => {
+    apiSend.mockResolvedValue({ id: 7 });
+    exchangeCredentials.mockResolvedValue(null);
+
+    await expect(
+      apiSessionProvider.register({ email: "ada@example.com", password: "secret" }),
+    ).resolves.toEqual({ refused: "unavailable" });
+  });
+
+  it("lets a transport failure during sign-up through", async () => {
+    apiSend.mockRejectedValue(new TypeError("fetch failed"));
+
+    await expect(
+      apiSessionProvider.register({ email: "ada@example.com", password: "secret" }),
+    ).rejects.toBeInstanceOf(TypeError);
   });
 
   it("retires the refresh token before dropping the cookies", async () => {

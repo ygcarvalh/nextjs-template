@@ -13,9 +13,10 @@ import { REQUEST_ID_HEADER, resolveRequestId } from "@/lib/request-id";
 
 // Everything is gated unless it is named here, so a screen added next month is
 // protected by forgetting rather than by remembering.
-const PUBLIC_PAGES = new Set(["/", "/login"]);
+const PUBLIC_PAGES = new Set(["/", "/login", "/register"]);
 const PUBLIC_API = new Set(["/api/health", "/api/metrics"]);
-const CREDENTIAL_POSTS = new Set(["/login"]);
+const CREDENTIAL_POSTS = new Set(["/login", "/register"]);
+const SIGNED_OUT_ONLY = new Set(["/login", "/register"]);
 const UNLOGGED_PATHS = new Set(["/api/health", "/api/metrics"]);
 
 const ACCESS_SKEW_MS = 60_000;
@@ -156,7 +157,7 @@ export default async function proxy(request: NextRequest) {
     return tagged(NextResponse.redirect(url), requestId);
   }
 
-  if (signedIn && pathname === "/login" && request.method === "GET") {
+  if (signedIn && SIGNED_OUT_ONLY.has(pathname) && request.method === "GET") {
     return tagged(NextResponse.redirect(new URL("/notes", request.url)), requestId);
   }
 

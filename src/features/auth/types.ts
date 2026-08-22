@@ -24,10 +24,21 @@ export const credentialsSchema = z.object({
   password: z.string().min(1),
 });
 
+export const registrationSchema = z.object({
+  email: z.email(),
+  password: z.string().min(MIN_PASSWORD_LENGTH),
+  name: z.string().min(1).optional(),
+});
+
+/** Why an account was not created. The form turns each one into a sentence. */
+export const REFUSALS = ["taken", "unavailable"] as const;
+
 export type UserRead = z.infer<typeof userReadSchema>;
 export type Session = z.infer<typeof sessionSchema>;
 export type Credentials = z.infer<typeof credentialsSchema>;
 export type Role = (typeof ROLES)[number];
+export type Registration = z.infer<typeof registrationSchema>;
+export type Refusal = (typeof REFUSALS)[number];
 
 export function toSession(user: UserRead): Session {
   return {
