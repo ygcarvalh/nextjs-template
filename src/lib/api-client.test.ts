@@ -142,6 +142,16 @@ describe("apiGet", () => {
     await expect(apiGet("/users/me")).resolves.toEqual({ id: 1 });
   });
 
+  it("surfaces a cookie write that failed for any other reason", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(answer({ detail: "expired" }, 401))
+      .mockResolvedValueOnce(answer({ id: 1 }));
+    exchangeRefresh.mockResolvedValue({ access_token: "fresh", refresh_token: "new-refresh" });
+    writeTokens.mockRejectedValue(new Error("disk full"));
+
+    await expect(apiGet("/users/me")).rejects.toThrow("disk full");
+  });
+
   it("gives up when the refresh is refused", async () => {
     vi.mocked(fetch).mockResolvedValue(answer({ detail: "expired" }, 401));
     exchangeRefresh.mockResolvedValue(null);
@@ -158,6 +168,14 @@ describe("apiGet", () => {
     clearTokens.mockRejectedValue(new Error("cookies can only be modified in an action"));
 
     await expect(apiGet("/users/me")).rejects.toMatchObject({ expired: true });
+  });
+
+  it("surfaces a jar that fails to clear for any other reason", async () => {
+    vi.mocked(fetch).mockResolvedValue(answer({ detail: "expired" }, 401));
+    exchangeRefresh.mockResolvedValue(null);
+    clearTokens.mockRejectedValue(new Error("disk full"));
+
+    await expect(apiGet("/users/me")).rejects.toThrow("disk full");
   });
 
   it("falls back when the failure body is not JSON at all", async () => {

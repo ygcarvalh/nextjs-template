@@ -77,15 +77,17 @@ async function send(path: string, init: RequestInit, access: string | null): Pro
   });
 }
 
-async function persist(pair: Awaited<ReturnType<typeof exchangeRefresh>>): Promise<void> {
-  if (!pair) {
-    return;
-  }
+function refusedOutsideAnAction(error: unknown): boolean {
+  return error instanceof Error && /can only be modified/i.test(error.message);
+}
+
+async function writeJarWhenAllowed(write: () => Promise<void>): Promise<void> {
   try {
-    await writeTokens(pair);
-  } catch {
-    // A server component cannot write cookies. This render still uses the new
-    // access token, and the middleware persists the rotation next request.
+    await write();
+  } catch (error) {
+    if (!refusedOutsideAnAction(error)) {
+      throw error;
+    }
   }
 }
 
@@ -99,15 +101,11 @@ async function apiFetch(path: string, init: RequestInit = {}): Promise<Response>
 
   const pair = await exchangeRefresh(refresh, await outboundRequestId());
   if (!pair) {
-    try {
-      await clearTokens();
-    } catch {
-      // Same story as above: a render cannot clear cookies, the middleware can.
-    }
+    await writeJarWhenAllowed(clearTokens);
     throw new ApiError(UNAUTHORIZED, "The session has expired.", null, true);
   }
 
-  await persist(pair);
+  await writeJarWhenAllowed(() => writeTokens(pair));
   return send(path, init, pair.access_token);
 }
 
