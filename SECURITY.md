@@ -6,7 +6,7 @@ Open a private security advisory through GitHub rather than a public issue.
 
 ## What the template already does
 
-`pnpm audit --prod` reports no advisories, and CI fails the build on anything moderate or worse. `postcss` and `sharp` are pinned forward in `pnpm-workspace.yaml`, since the versions Next depends on carry open advisories.
+`pnpm audit --prod --audit-level moderate` reports no advisories at the 1.0.0 release. There is no CI to run it for you: it is one of the three commands [`CONTRIBUTING.md`](CONTRIBUTING.md) asks for before a push, and the landing page's ledger claims zero only because that command exits clean. `nanoid`, `postcss` and `sharp` are pinned forward in `pnpm-workspace.yaml`, since the versions Next depends on carry open advisories. The same command without `--prod` reports findings in tooling that never ships: the shadcn CLI, Vitest and their transitive parsers. `docs/superpowers/roadmap.md` lists them.
 
 Every response carries a CSP, HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, a `Referrer-Policy`, and a `Permissions-Policy`. `poweredByHeader` is off, so responses no longer name the framework. All six headers are defined once in `src/lib/security-headers.ts` and asserted in a test, so dropping one fails the suite.
 
