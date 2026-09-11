@@ -179,7 +179,7 @@ Lines record method, path, status, duration, client IP and the correlation ID. B
 
 `LOG_FORMAT=console` swaps the JSON for a readable stream while you work. `LOG_FILE` adds a file sink on top of stdout, for a platform that wants one.
 
-Prometheus metrics are served at `/api/metrics`, from `prom-client`. Set `METRICS_ENABLED=false` to withdraw the route. The counters live in the process, so behind more than one Node worker each reports only its own share.
+Prometheus metrics are served at `/api/metrics`, from [`@prometheus-io/client`](https://github.com/prometheus/client_js), the continuation of `prom-client`. Set `METRICS_ENABLED=false` to withdraw the route. The counters live in the process, so behind more than one Node worker each reports only its own share.
 
 ### Searching the logs
 

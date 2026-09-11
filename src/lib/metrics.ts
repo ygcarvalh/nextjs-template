@@ -1,5 +1,5 @@
 import "server-only";
-import { Counter, collectDefaultMetrics, Histogram, Registry } from "prom-client";
+import { Counter, collectDefaultMetrics, Histogram, Registry } from "@prometheus-io/client";
 
 export interface RequestSample {
   method: string;
