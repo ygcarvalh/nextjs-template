@@ -18,7 +18,11 @@ green except for `next build` without `.env.local`, 70 spec files, 535 tests, 98
 0.35.3. It closed the audit, cleared six lint warnings, marked the active theme in both menus, moved
 the loading label into the dictionaries, raised the coverage floor to one point under the measured
 numbers, pinned pnpm 11 with `engine-strict`, added `cliff.toml`, and wrote the release section into
-`CONTRIBUTING.md`.
+`CONTRIBUTING.md`. A second batch the same day, at the user's request, split `src/proxy.ts` into
+`route-gate.ts`, `session-rotation.ts` and `lib/edge-request.ts`, narrowed the two swallowed cookie
+writes in `api-client.ts` to the one error a render produces, split the preference hooks into one
+file per concern, raised the TypeScript target to ES2022, and removed the 124 explanatory comments
+the code carried; what they explained lives below and in the README.
 
 ## Standing debt, no pass assigned
 
@@ -35,20 +39,6 @@ numbers, pinned pnpm 11 with `engine-strict`, added `cliff.toml`, and wrote the 
   `react` and `react-dom` 19.2.8 to 19.3.0, `zod` 4.4.3 to 4.6.1, `@biomejs/biome` 2.5.6 to
   2.5.13, `@playwright/test` 1.62.1 to 1.63.0, `shadcn` 4.16 to 4.21, and majors for `typescript`
   (7), `vitest` and `@vitest/coverage-v8` (5). Dependabot groups the routine ones weekly.
-- **`src/proxy.ts` carries five jobs.** Request logging, two rate limiters, the token refresh, the
-  session gate and the signed-out-only redirect all live in one file, because the proxy is the only
-  layer that can write a cookie and rewrite the forwarded `cookie` header at once. It is the file
-  that grows with every new public path. When it does, `gate.ts` and `refresh.ts` under
-  `src/features/auth/server/` are the extraction, and `src/proxy.test.ts` already exercises both
-  halves separately.
-- **`src/lib/api-client.ts` swallows two failures on purpose.** A server component cannot write or
-  clear a cookie, so `persist` and the refused-refresh branch catch and continue; the proxy repeats
-  the write on the next request. Both `catch` blocks carry the explanation in a comment, which is the
-  one place this repository prefers a comment to a name. A `canWriteCookies()` probe would make the
-  branch explicit and remove both comments.
-- **`tsconfig.json` targets ES2017.** It is what `create-next-app` writes. Node 22 and every browser
-  the CSP is written for run ES2022, and the lower target costs downlevelled `async` and class
-  fields in the client bundle. Raising it changes the build output and waits for a measurement.
 - **The root failure screen is English only.** `src/app/global-error.tsx` renders when the root
   layout itself throws, before any provider exists, so no dictionary can reach it. It is the one
   deliberate exception to the rule that every visible string lives in both dictionaries. The
@@ -59,9 +49,6 @@ numbers, pinned pnpm 11 with `engine-strict`, added `cliff.toml`, and wrote the 
   step of `verify` imports it. `README.md` and `CONTRIBUTING.md` say so; the alternative is a
   `verify` that exports a placeholder, which would hide exactly the failure the validation exists
   to surface.
-- **The code carries explanatory comments.** About a hundred, most of them the "why" behind a
-  non-obvious branch. The house rule for new code is self-documenting names and no comments;
-  existing ones stay until the code around them is touched for another reason.
 - **The repository is not marked as a template on GitHub.** `gh repo edit --template` is a remote
   write and waits for a yes.
 
@@ -112,3 +99,57 @@ by island and a click that lands first does nothing.
 prefers the Cookie Store API, which jsdom does not implement. `biome.json` turns the rule off for
 `**/*.test.tsx` and nowhere else; `src/lib/request.test.tsx` seeds the jar that way to exercise the
 page-cookie fallback for the correlation id.
+
+**Why the code does what it does, formerly in comments.**
+
+- `src/lib/api-client.ts` catches exactly one failure around `writeTokens` and `clearTokens`: the
+  error Next raises when a render tries to modify cookies. The render still uses the new access
+  token and the proxy persists the rotation on the next request. Anything else is rethrown.
+- `src/lib/metrics.ts` keeps the prom-client registry on `globalThis` because a module can be
+  evaluated more than once in development and prom-client throws on a duplicate metric name.
+- `src/app/globals.css` declares `color-scheme` for both themes; without it the browser paints
+  native controls from the system palette, which is how a dark page ends up with an unreadable
+  select. `globals.test.ts` holds it.
+- `src/features/preferences/components/preference-store.tsx` mirrors the locale cookie into
+  `localStorage` so client code can read it without a cookie parser, and the e2e suite uses that
+  write as its "a client effect has run" signal. A browser with storage blocked still has the
+  cookie, which is why the write may fail quietly.
+- `src/i18n/components/language-toggle.tsx` renders each language as a submit button inside a
+  form: a click before hydration posts the Server Action and works with no JavaScript, and once
+  hydrated the click handler wins because it can refresh the router.
+- `src/features/requests/components/outcome-filter.tsx` owns its hidden input rather than using the
+  Select's, because the submit has to carry the value just picked and the component's own input is
+  one render behind at that point. Picking an outcome filters at once; the text fields keep a
+  button because navigating on every keystroke would be worse.
+- `src/features/requests/components/requests-pager.tsx` says Older and Newest rather than Previous
+  and Next: a cursor walks one way and the way back is the top of the list.
+- `src/features/auth/server/jwt-claims.ts` reads `exp` and never verifies: the API owns
+  verification and the proxy only needs to know when to ask for a fresh pair.
+- `src/features/auth/server/token-exchange.ts` posts the login as an OAuth2 password form, not
+  JSON, because that is what the API's `/auth/login` accepts. Logout is best effort: the cookies go
+  either way, and a token the API never heard of is no reason to keep a reader signed in.
+- `src/features/auth/server/session.ts` caches the session per request because a layout and its
+  page both ask and one render should cost one call.
+- `src/features/preferences/server/preferences.ts` reads the account's preferences once, at
+  sign-in, into cookies every render can read for free; an API that is down is not a reason to fail
+  a page that only wanted to know which theme to paint.
+- `src/hooks/use-hydrated.ts` exists because a form that submits through `fetch` cannot work before
+  its island hydrates: the browser would post the form the plain way to a page path that answers no
+  write. Anything gated on it stays visibly disabled until it can act.
+- `src/features/auth/password-strength.ts` treats one repeated character and a walk up or down the
+  keyboard the same way, since both leave every gap between neighbours identical. It is advisory:
+  the form still submits whatever clears the API's floor.
+- `src/components/toaster.test.tsx` queries the close control by its slot because Base UI keeps it
+  out of the accessibility tree until the viewport is hovered or focused.
+- `src/components/account-menu.test.tsx` disables axe's `region` rule because the popup is
+  portalled to the body, outside every landmark, by design.
+- `src/lib/logger.ts` loads `pino-pretty` only when `LOG_FORMAT=console` asks for it, because it is
+  a dev dependency.
+- `src/lib/request-id-server.ts` reads the id from async storage in a route handler and from the
+  forwarded header in a server component or action, because only the first has a storage context.
+- `src/lib/outcome.ts` puts a status of 0, a rejected fetch, on the error branch with 500: no
+  answer at all is a failure, not a refusal.
+- `e2e/global-teardown.ts` deactivates the account the run registered, because a database that
+  outlives the suite otherwise fills with `e2e-*@example.com`.
+- `e2e/signed-in/toast.spec.ts` injects the failure at the browser's own route handler, the one hop
+  it owns, because the API is not made to fail on demand.

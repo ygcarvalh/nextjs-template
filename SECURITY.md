@@ -12,13 +12,13 @@ Every response carries a CSP, HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Opt
 
 Tokens never reach the browser. The access and refresh tokens the API mints are stored as `httpOnly`, `sameSite=lax` cookies, `Secure` and `__Host-` prefixed on an https origin, and only server code reads them. `src/proxy.ts` redirects anonymous visitors on cookie presence alone, which is not the authorization boundary: `(protected)/layout.tsx` asks the API who the caller is, and the API verifies the token on every call, so a bypass at the proxy layer still renders and returns nothing.
 
-The gate denies by default. Everything not named in `PUBLIC_PAGES` or `PUBLIC_API` requires a session, so a route added later is protected until someone deliberately opens it.
+The gate denies by default. Everything `src/features/auth/server/route-gate.ts` does not name in `PUBLIC_PAGES` or `PUBLIC_API` requires a session, so a route added later is protected until someone deliberately opens it.
 
 Signing out revokes rather than forgets. The refresh token is posted to `POST /auth/logout`, which marks its row on the API revoked, so a token copied out of this browser beforehand stops working too. Changing a password revokes every session the account has. Access tokens already issued still live out their 30 minutes, which is the remaining window.
 
 An inbound `x-request-id` is filtered before it reaches a log line or a cookie. `src/lib/request-id.ts` accepts at most 64 characters of `[A-Za-z0-9_-]` and mints a fresh ID for anything else, because the header is caller-controlled: a newline in it would let that caller write forged entries into the log stream, and the value is echoed back in a response header and a readable cookie.
 
-Request logs record metadata only. Both the edge line in `src/proxy.ts` and the route line in `src/lib/with-route-logging.ts` carry method, path, status, duration, client IP, and correlation ID. Bodies, query values, headers, and cookies never reach either one, so the template ships no redaction list and does not need one.
+Request logs record metadata only. Both the edge line in `src/lib/edge-request.ts` and the route line in `src/lib/with-route-logging.ts` carry method, path, status, duration, client IP, and correlation ID. Bodies, query values, headers, and cookies never reach either one, so the template ships no redaction list and does not need one.
 
 The `x-request-id` cookie is deliberately readable by scripts. It holds nothing but an opaque per-request identifier, which the client error boundary reads to show the user a reference they can quote. Marking it `httpOnly` would defeat its only purpose; it grants no access and carries no session state.
 

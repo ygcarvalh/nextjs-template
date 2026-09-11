@@ -48,7 +48,7 @@ Feature-based: each feature colocates its own components, server code, and tests
 ```
 instrumentation.ts             # server-boot hook: logger and metrics
 src/
-  proxy.ts                     # correlation id, session gate, token refresh, rate limit
+  proxy.ts                     # the request pipeline: id, log, throttle, refresh, gate
   app/
     (public)/                  # marketing chrome
       page.tsx                 # /
@@ -71,6 +71,8 @@ src/
   features/
     auth/
       server/
+        route-gate.ts          # which paths are public, guarded, or signed-out only
+        session-rotation.ts    # refreshes the pair for the proxy and forwards the new token
         session-provider.ts    # the port
         api-session.ts         # the adapter — replace this one
         session.ts             # the composition point
@@ -105,6 +107,7 @@ src/
     security-headers.ts, http.ts, rate-limit.ts, utils.ts, flags.ts, outcome.ts
     logger.ts, metrics.ts, with-route-logging.ts
     request-id.ts, request-context.ts, request-id-client.ts, request-id-server.ts
+    edge-request.ts            # the client address and the request.received line, edge safe
   env.ts                       # validated, typed environment variables
 ```
 
@@ -165,7 +168,7 @@ When something fails, the id reaches the reader as a toast: `src/components/prob
 
 Two loggers write, because the edge runtime cannot run pino:
 
-- `src/proxy.ts` writes one `request.received` line per request with a hand-built `console.log(JSON.stringify(...))`. This is the only record of a page load.
+- `src/proxy.ts` writes one `request.received` line per request through `src/lib/edge-request.ts`, a hand-built `console.log(JSON.stringify(...))`. This is the only record of a page load.
 - `src/lib/logger.ts` is pino, for everything in the Node runtime. `withRouteLogging` wraps a route handler and writes one `request` line with the status and duration. `AsyncLocalStorage` carries the ID, so no call site has to pass it.
 
 ```json
@@ -280,7 +283,7 @@ Everything that needs to know the origin reads `NEXT_PUBLIC_APP_URL`: `metadataB
 
 Security headers are defined in `src/lib/security-headers.ts` and applied to every response. `POST /api/notes` returns 401 without a session, 415 for a non-JSON content type, 400 for a malformed body, 413 for an oversized one, and 409 at the per-owner limit. The `?next=` parameter is filtered against open-redirect payloads, and an inbound `x-request-id` is filtered before it reaches a log line.
 
-The gate in `src/proxy.ts` denies by default: everything that is not named in `PUBLIC_PAGES` or `PUBLIC_API` needs a session, so a screen added next month is protected by forgetting rather than by remembering. It rate-limits gated API paths and both credential POSTs, sign-in and sign-up, and deliberately leaves every other Server Action alone: a 429 is not an answer a Server Action can give, so React receives a body it cannot read and the form stays pending forever. The endpoints worth throttling are throttled by the API, which can answer with a message. One consequence worth knowing: a signed-out visitor who types an unknown URL is bounced to sign-in rather than shown the 404.
+The gate in `src/proxy.ts` denies by default: everything that `src/features/auth/server/route-gate.ts` does not name in `PUBLIC_PAGES` or `PUBLIC_API` needs a session, so a screen added next month is protected by forgetting rather than by remembering. It rate-limits gated API paths and both credential POSTs, sign-in and sign-up, and deliberately leaves every other Server Action alone: a 429 is not an answer a Server Action can give, so React receives a body it cannot read and the form stays pending forever. The endpoints worth throttling are throttled by the API, which can answer with a message. One consequence worth knowing: a signed-out visitor who types an unknown URL is bounced to sign-in rather than shown the 404.
 
 See [SECURITY.md](SECURITY.md) for what to change before deploying.
 
