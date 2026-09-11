@@ -24,8 +24,6 @@ export function parseRequestFilters(params: Params): RequestFilters {
     outcome,
     path: path === "" ? null : path,
     requestId: sanitizeRequestId(single(params, "request_id")),
-    // The API refuses a cursor it did not issue; this only keeps a malformed one
-    // out of the query string in the first place.
     cursor: cursor && CURSOR_PATTERN.test(cursor) ? cursor : null,
   };
 }

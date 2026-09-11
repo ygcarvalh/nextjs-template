@@ -3,8 +3,6 @@ import { ACCOUNT_FILE, type Account } from "./support";
 
 const API_URL = process.env.API_URL ?? "http://127.0.0.1:8000/api/v1";
 
-// A run that registers its own account owns it, and leaving one behind on every
-// run is how a database fills with e2e-*@example.com.
 export default async function globalTeardown(): Promise<void> {
   if (process.env.E2E_EMAIL || !existsSync(ACCOUNT_FILE)) {
     return;

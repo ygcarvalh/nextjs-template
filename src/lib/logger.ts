@@ -6,7 +6,6 @@ import { getRequestId } from "@/lib/request-context";
 
 const STDOUT_FD = 1;
 
-// pino-pretty is a dev dependency, so it is loaded only when asked for.
 function prettyStream(): DestinationStream {
   const require = createRequire(import.meta.url);
   const pretty = require("pino-pretty") as (options: object) => DestinationStream;

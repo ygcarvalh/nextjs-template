@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const ROLES = ["user", "admin"] as const;
 
-// The API enforces the same floor; a form that checks it first saves a round trip.
 export const MIN_PASSWORD_LENGTH = 8;
 
 export const userReadSchema = z.object({
@@ -30,7 +29,6 @@ export const registrationSchema = z.object({
   name: z.string().min(1).optional(),
 });
 
-/** Why an account was not created. The form turns each one into a sentence. */
 export const REFUSALS = ["taken", "unavailable"] as const;
 
 export type UserRead = z.infer<typeof userReadSchema>;

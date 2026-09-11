@@ -1,5 +1,3 @@
-// Optional features, not screens the app needs. Settings and the request log
-// are part of the app, so they are not in here.
 export const FLAGS = ["notes"] as const;
 
 export type Flag = (typeof FLAGS)[number];
@@ -17,8 +15,6 @@ export function serializeFlags(flags: Iterable<Flag>): string {
   return FLAGS.filter((flag) => chosen.has(flag)).join(",");
 }
 
-// An account that has named its own list gets it; everyone else follows the
-// environment, which is what a deploy decides.
 export function resolveFlags(environment: string, override: string | null): Set<Flag> {
   return parseFlags(override ?? environment);
 }

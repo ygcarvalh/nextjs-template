@@ -5,9 +5,6 @@ export type ChromePreferences = {
   showRequestId: boolean;
 };
 
-// What the chrome needs to paint itself, small enough to ride in a cookie. The
-// row on the account stays the source that follows a reader to another device;
-// this is the copy a render can have for free.
 export function parseChromePreferences(value: string | undefined): ChromePreferences {
   const fallback: ChromePreferences = {
     theme: DEFAULT_PREFERENCES.theme,

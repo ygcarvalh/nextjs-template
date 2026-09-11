@@ -9,8 +9,6 @@ async function reachable(): Promise<boolean> {
   return Boolean(response?.ok);
 }
 
-// The signed-in suite changes a name and a password, so it gets an account of
-// its own rather than mutating one somebody else is using.
 async function register(): Promise<{ email: string; password: string }> {
   const account = {
     email: `e2e-${Date.now().toString(36)}@example.com`,

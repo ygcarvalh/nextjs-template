@@ -50,8 +50,6 @@ describe("Toaster", () => {
     },
   );
 
-  // Base UI keeps the close control out of the accessibility tree until the
-  // viewport is hovered or focused, so this one is queried by its slot.
   it("closes on the dismiss control", async () => {
     await raise("warning");
     await screen.findByText("a warning");

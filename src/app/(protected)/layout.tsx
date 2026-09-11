@@ -10,8 +10,6 @@ import { getDictionary, getLocale } from "@/i18n/server";
 import type { Flag } from "@/lib/flags";
 import { cn } from "@/lib/utils";
 
-// The request log lives behind the settings screen, so the header stays about
-// the app rather than about its instrumentation.
 const NAV: { flag: Flag; href: string; key: "notes" }[] = [
   { flag: "notes", href: "/notes", key: "notes" },
 ];

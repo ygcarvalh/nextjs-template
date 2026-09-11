@@ -32,8 +32,6 @@ export function useProblemToast(): (error: unknown, fallback: string) => void {
 
       manager.add({
         type: outcome,
-        // An error is announced urgently and stays until it is dismissed; a
-        // refusal is a normal answer and goes away on its own.
         priority: outcome === "error" ? "high" : "low",
         timeout: outcome === "error" ? STICKY : WARNING_TIMEOUT_MS,
         title: outcome === "error" ? t.toast.errorTitle : t.toast.warningTitle,

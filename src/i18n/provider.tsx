@@ -7,8 +7,6 @@ import { DEFAULT_LOCALE, type Locale } from "@/i18n/locale";
 
 type Spoken = { dictionary: Dictionary; locale: Locale };
 
-// The default is the real dictionary, so an error boundary rendering outside
-// the provider still has words.
 const SpokenContext = createContext<Spoken>({ dictionary: enUS, locale: DEFAULT_LOCALE });
 
 export function DictionaryProvider({

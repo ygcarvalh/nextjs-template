@@ -3,8 +3,6 @@ import { ready } from "../support";
 
 const REFERENCE = "e2e-forced-failure-001";
 
-// The API is not made to fail on demand, so the failure is injected at the one
-// hop the browser owns: its own route handler.
 async function refuse(page: import("@playwright/test").Page, status: number) {
   await page.route("**/api/notes", async (route) => {
     if (route.request().method() !== "POST") {

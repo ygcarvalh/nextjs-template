@@ -14,8 +14,6 @@ interface MetricsBundle {
   duration: Histogram<"method" | "route">;
 }
 
-// A module can be evaluated more than once in dev, and prom-client throws on a
-// duplicate metric name, so the bundle lives on globalThis.
 const globalMetrics = globalThis as typeof globalThis & {
   __templateMetrics?: MetricsBundle;
 };

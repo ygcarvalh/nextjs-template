@@ -6,8 +6,6 @@ import type { Dictionary } from "@/i18n/dictionary";
 import { fill } from "@/i18n/fill";
 import { cn } from "@/lib/utils";
 
-// Older and newest, not previous and next: a cursor walks one way, and the way
-// back is the top of the list rather than a page number.
 export function RequestsPager({
   page,
   filters,

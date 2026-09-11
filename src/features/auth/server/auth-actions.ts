@@ -8,7 +8,6 @@ import { adoptStoredPreferences } from "@/features/preferences/server/preference
 import { getDictionary } from "@/i18n/server";
 import type { FormState } from "@/lib/form-state";
 
-// Where both doors lead when nothing else was asked for.
 const HOME = "/notes";
 
 export async function login(_previous: FormState, formData: FormData): Promise<FormState> {

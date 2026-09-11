@@ -72,7 +72,6 @@ describe("NotesWidget", () => {
     expect(await screen.findByText("added")).toBeInTheDocument();
   });
 
-  // A refused write raises a toast, which is what carries the correlation id.
   it("reports a rejected note instead of silently clearing the field", async () => {
     const fetchMock = vi
       .fn()
@@ -107,8 +106,6 @@ describe("NotesWidget", () => {
     expect(report.mock.calls[0][0]).toMatchObject({ problem: { status: 0 } });
   });
 
-  // A load failure stays on the page: a toast would leave an empty board with
-  // no explanation once it faded.
   it("keeps a failed load on the page rather than in a toast", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(answer({ error: "nope" }, 401)));
 

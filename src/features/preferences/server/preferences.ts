@@ -27,8 +27,6 @@ function fromApi(stored: StoredPreferences): Preferences {
   };
 }
 
-// A signed-out visitor has no row, and an API that is down is not a reason to
-// fail a page that only wanted to know which theme to paint.
 export const readPreferences = cache(async (): Promise<Preferences | null> => {
   try {
     const parsed = preferencesSchema.safeParse(await apiGet<StoredPreferences>(PATH));
@@ -45,8 +43,6 @@ export async function savePreferences(patch: Partial<StoredPreferences>): Promis
   await apiSend<StoredPreferences>("PATCH", PATH, patch);
 }
 
-// Read once, at sign-in, into the cookies every render can read for free. The
-// alternative is asking the API what theme to paint on every page.
 export async function adoptStoredPreferences(): Promise<void> {
   const preferences = await readPreferences();
   if (!preferences) {

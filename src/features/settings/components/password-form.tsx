@@ -25,8 +25,6 @@ export function PasswordForm() {
   const nextId = useId();
   const confirmId = useId();
 
-  // The two rules a form can check without asking anyone: the same endpoint
-  // checks them again, because a browser is not where a rule lives.
   function refuse(): string | null {
     if (fields.newPassword !== fields.confirmation) {
       return t.settings.passwordMismatch;

@@ -77,8 +77,6 @@ describe("AccountMenu", () => {
     );
   });
 
-  // The region rule is off because the popup is portalled to the body, where it
-  // sits outside every landmark by design.
   it("has no detectable accessibility violations with the menu open", async () => {
     await open();
     await screen.findByRole("menuitem", { name: enUS.chrome.signOut });

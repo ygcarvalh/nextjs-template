@@ -8,9 +8,6 @@ test("saves a name and shows it again after a reload", async ({ page }) => {
   const name = `Ada ${test.info().testId.slice(0, 6)}`;
   const profile = page.locator("form").filter({ has: page.getByLabel("Name") });
   const save = profile.getByRole("button", { name: "Save" });
-  // The button is disabled until this island hydrates, which makes it the signal
-  // to wait on: these inputs are controlled, so a value typed before React took
-  // over would be discarded, and a click would save the old one.
   await expect(save).toBeEnabled();
   await page.getByLabel("Name").fill(name);
   await save.click();

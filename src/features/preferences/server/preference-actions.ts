@@ -10,8 +10,6 @@ import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locale";
 import { ApiError } from "@/lib/api-client";
 import { LOCALE_COOKIE, preferenceCookieOptions } from "@/lib/cookies";
 
-// The cookie is what the next render reads, so it is written first and the
-// account's copy follows. A signed-out visitor keeps the cookie and nothing else.
 async function remember(patch: Parameters<typeof savePreferences>[0]): Promise<void> {
   try {
     await savePreferences(patch);

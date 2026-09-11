@@ -36,8 +36,6 @@ export const apiSessionProvider: SessionProvider = {
     return this.read();
   },
 
-  // Signing up opens the first session in the same call, so a newcomer never
-  // meets a sign-in form they have nothing to type into yet.
   async register(registration) {
     try {
       await apiSend("POST", "/users", registration);
@@ -55,8 +53,6 @@ export const apiSessionProvider: SessionProvider = {
     return session ?? { refused: "unavailable" };
   },
 
-  // Retiring the token matters more than the cookies: the cookies only stop
-  // this browser, the revocation stops anyone who copied the token.
   async destroy() {
     const { refresh } = await readTokens();
     if (refresh) {

@@ -55,8 +55,6 @@ describe("LanguageToggle", () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
-  // A click that lands before hydration has to do something, so each control
-  // is a submit button inside a form the server action can take on its own.
   it("still submits without JavaScript", () => {
     const { container } = render(<LanguageToggle current="en-US" />);
 

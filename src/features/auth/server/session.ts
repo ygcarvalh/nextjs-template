@@ -6,7 +6,6 @@ import type { Credentials, Registration } from "@/features/auth/types";
 
 const provider: SessionProvider = apiSessionProvider;
 
-// A layout and its page both ask; one render should cost one call.
 export const getSession = cache(() => provider.read());
 
 export function createSession(credentials: Credentials) {

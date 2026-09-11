@@ -27,8 +27,6 @@ async function handlePost(request: Request) {
 
   const parsed = changeSchema.safeParse(body.value);
   if (!parsed.success) {
-    // The form checks the same two rules before it gets here; this is the check
-    // that holds when something else calls the endpoint.
     return NextResponse.json(
       {
         error: `Enter the current password and a new one of at least ${MIN_PASSWORD_LENGTH} characters, twice.`,

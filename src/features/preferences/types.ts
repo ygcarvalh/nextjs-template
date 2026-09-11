@@ -18,7 +18,6 @@ export type Preferences = {
   locale: (typeof LOCALES)[number];
   theme: Theme;
   showRequestId: boolean;
-  // Null means this account follows the environment's feature list.
   features: string | null;
 };
 

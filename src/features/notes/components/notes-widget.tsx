@@ -30,8 +30,6 @@ export function NotesWidget() {
     minute: "2-digit",
   });
 
-  // A load failure stays on the page: a toast that vanishes would leave an
-  // empty board with no explanation.
   const load = useCallback(async () => {
     try {
       const data = await jsonRequest<{ notes: Note[] }>("/api/notes");

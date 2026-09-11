@@ -194,8 +194,6 @@ describe("the rate limit", () => {
     expect(flood.at(-1)?.headers.get("retry-after")).toBeTruthy();
   });
 
-  // A Server Action cannot answer with a 429: React would get a body it cannot
-  // read and the form would stay pending forever.
   it("leaves server actions to the API to throttle", async () => {
     const attempts = [];
     for (let attempt = 0; attempt < 40; attempt += 1) {

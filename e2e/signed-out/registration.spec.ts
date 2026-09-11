@@ -1,8 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { account, submitUntil } from "../support";
 
-// The suite runs against a database that outlives it, so every run signs up as
-// somebody new.
 function newcomer(): string {
   return `signup-${Math.random().toString(36).slice(2, 8)}@example.com`;
 }

@@ -14,8 +14,6 @@ export const followsEnvironment = cache(async (): Promise<boolean> => {
   return (await readPreferences())?.features == null;
 });
 
-// The API decides which endpoints exist, and a screen with no endpoint behind
-// it is worth hiding rather than letting it fail.
 export const apiFeatures = cache(async (): Promise<Set<string>> => {
   try {
     const answer = await apiGet<{ flags?: unknown }>("/features");

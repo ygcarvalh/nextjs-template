@@ -26,7 +26,6 @@ async function readPair(response: Response): Promise<TokenPair | null> {
   return parsed.success ? parsed.data : null;
 }
 
-// The API's login is an OAuth2 password form, so this one is not JSON.
 export async function exchangeCredentials(
   credentials: Credentials,
   requestId: string | null,
@@ -48,8 +47,6 @@ export async function exchangeCredentials(
   return response ? readPair(response) : null;
 }
 
-// Best effort: the cookies go either way, and a token the API never heard of
-// is not a reason to keep a reader signed in.
 export async function revokeRefresh(refreshToken: string, requestId: string | null): Promise<void> {
   await fetch(`${env.API_URL}/auth/logout`, {
     method: "POST",

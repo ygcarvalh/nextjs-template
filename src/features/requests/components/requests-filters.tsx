@@ -5,8 +5,6 @@ import { OutcomeFilter } from "@/features/requests/components/outcome-filter";
 import type { RequestFilters } from "@/features/requests/types";
 import type { Dictionary } from "@/i18n/dictionary";
 
-// A GET form, so the URL stays the state and the filters survive a share or a
-// reload. The select carries its own hidden input, so that still holds.
 export function RequestsFilters({ filters, t }: { filters: RequestFilters; t: Dictionary }) {
   return (
     <form method="get" className="mt-8 flex flex-wrap items-end gap-4">

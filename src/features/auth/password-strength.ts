@@ -13,8 +13,6 @@ function classesUsed(password: string): number {
   return CHARACTER_CLASSES.filter((pattern) => pattern.test(password)).length;
 }
 
-// One repeated character and a walk up or down the keyboard both leave every
-// gap between neighbours identical, so a single pass catches the two of them.
 function walksInOneDirection(password: string): boolean {
   const codes = Array.from(password.toLowerCase(), (character) => character.charCodeAt(0));
   const step = codes[1] - codes[0];
@@ -31,8 +29,6 @@ function lengthPoints(length: number): number {
   return length >= LONG_LENGTH ? 2 : 1;
 }
 
-// Advisory only: the form still submits whatever clears the API floor, because
-// this reads length and variety and knows nothing about a password being famous.
 export function passwordStrength(password: string): Strength {
   if (!password) {
     return "empty";

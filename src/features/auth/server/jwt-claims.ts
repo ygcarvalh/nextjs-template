@@ -9,8 +9,6 @@ function fromBase64Url(value: string): string | null {
   }
 }
 
-// Read, never verify: the API owns verification, and this only needs to know
-// when to ask for a fresh pair.
 export function readExpiry(token: string): number | null {
   const [, payload] = token.split(".");
   if (!payload) {

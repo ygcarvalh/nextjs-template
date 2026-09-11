@@ -10,8 +10,6 @@ function block(selector: string): string {
 }
 
 describe("globals.css", () => {
-  // Without color-scheme the browser paints native controls from the system
-  // palette, which is how a dark page ends up with an unreadable select.
   it.each([
     [":root", "light"],
     [".dark", "dark"],

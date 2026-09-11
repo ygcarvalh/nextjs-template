@@ -9,9 +9,6 @@ import { cn } from "@/lib/utils";
 
 const FLAGS = { "en-US": UnitedStatesFlag, "pt-BR": BrazilFlag } as const;
 
-// Two paths on purpose. The form is what a click before hydration takes, and it
-// works with no JavaScript at all; once hydrated the handler wins, because it
-// can refresh the router and a bare revalidation cannot.
 export function LanguageToggle({ current }: { current: Locale }) {
   const choose = useLocaleChoice();
 

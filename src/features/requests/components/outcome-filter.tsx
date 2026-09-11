@@ -12,9 +12,6 @@ import {
 import { useDictionary } from "@/i18n/provider";
 import { OUTCOMES, type Outcome } from "@/lib/outcome";
 
-// The hidden input is ours rather than the Select's, because the submit has to
-// carry the value that was just picked and the component's own input is one
-// render behind at that point.
 export function OutcomeFilter({ current }: { current: Outcome | null }) {
   const t = useDictionary();
   const chosen = useRef<HTMLInputElement>(null);
@@ -27,9 +24,6 @@ export function OutcomeFilter({ current }: { current: Outcome | null }) {
 
   const items: Record<string, string> = { "": t.requests.outcomeAny, ...labels };
 
-  // Picking an outcome filters at once: a control that changes nothing until a
-  // second button is pressed reads as broken. The text fields keep the button,
-  // because navigating on every keystroke would be worse.
   function filterBy(value: unknown) {
     const input = chosen.current;
     if (!input) {

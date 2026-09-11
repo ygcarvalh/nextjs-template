@@ -16,8 +16,6 @@ export const requestLogSchema = z.object({
   outcome: z.enum(OUTCOMES),
 });
 
-// No total: the API pages this collection by cursor, because counting a table
-// that grows by one row per request is the expensive part of reading it.
 export const requestPageSchema = z.object({
   items: z.array(requestLogSchema),
   limit: z.number().int().positive(),
