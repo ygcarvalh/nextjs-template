@@ -19,6 +19,7 @@ export const enUS = {
     health: "Health",
     robots: "robots.txt",
     sitemap: "Sitemap",
+    loading: "Loading",
   },
   titles: {
     login: "Sign in",

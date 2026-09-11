@@ -21,6 +21,7 @@ export const ptBR: Dictionary = {
     health: "Saúde",
     robots: "robots.txt",
     sitemap: "Sitemap",
+    loading: "Carregando",
   },
   titles: {
     login: "Entrar",
