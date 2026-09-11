@@ -39,6 +39,7 @@ Sign-in, and the 404 that any unmatched URL returns with a real 404 status.
 - [next-themes](https://github.com/pacocoursey/next-themes) — dark mode
 - [`@t3-oss/env-nextjs`](https://env.t3.gg) + [zod](https://zod.dev) — type-safe env
 - [Husky](https://typicode.github.io/husky) + lint-staged + commitlint — hooks
+- [git-cliff](https://git-cliff.org) through `pnpm dlx` — the changelog, without a devDependency
 
 ## Architecture
 
@@ -114,7 +115,9 @@ Two boundaries have tooling behind them. Biome's `noRestrictedImports` stops com
 ## Requirements
 
 - Node.js 22.13+
-- pnpm 9+
+- pnpm 11+
+
+`engines` in `package.json` names both and `.npmrc` sets `engine-strict=true`, so a mismatch stops `pnpm install` with a message instead of failing later in the build.
 
 ## Setup
 
@@ -291,6 +294,8 @@ pnpm build       # production build
 pnpm verify      # typecheck + lint + coverage + build
 ```
 
+`pnpm verify` reads `.env.local` for the build step, because `src/env.ts` has no default for `API_URL` and an unset one is meant to fail the build rather than production. Copy `.env.example` first, as [Setup](#setup) says.
+
 Hooks are the gate, because there is no CI workflow: `lint-staged` on commit, `commitlint` on the message, and on push typecheck, the unit suite, and the browser suite whenever the sibling API is answering — it says so and skips when it is not. `pnpm audit --prod --audit-level moderate` stays yours to run.
 
 Pushing the browser suite into the hook is deliberate. Every defect this template shipped and then fixed in its first days — a select that rendered but did nothing readable in the dark, a control that changed state and saved nothing, a rate limit that left a form pending forever — was invisible to the unit suite and obvious to the browser one.
@@ -313,4 +318,4 @@ pnpm dlx shadcn@latest add <component>
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under [MIT](LICENSE).
+See [CONTRIBUTING.md](CONTRIBUTING.md), which also describes how a release is cut. Licensed under [MIT](LICENSE).

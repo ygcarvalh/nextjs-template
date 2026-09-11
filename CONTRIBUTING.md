@@ -8,7 +8,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Node 22.13+ and pnpm 9+. `.nvmrc` and the `packageManager` field pin both.
+Node 22.13+ and pnpm 11. `engines` in `package.json` names both ranges and `.npmrc` sets `engine-strict=true`, so a mismatch stops `pnpm install` with a message instead of failing later in the build. `.nvmrc` picks the major for `nvm use` and the `packageManager` field pins the pnpm release.
 
 ## Before you push
 
@@ -18,7 +18,7 @@ pnpm audit --prod --audit-level moderate  # known advisories in what ships
 pnpm test:e2e                            # needs the sibling API running
 ```
 
-There is no CI workflow, so those three are the whole gate. The hooks run most of it for you: `lint-staged` on commit, `commitlint` on the message, and on push typecheck, the unit suite, and the browser suite when the API answers — it says so and skips when it does not.
+`pnpm verify` needs `.env.local`: the build imports `src/env.ts`, which has no default for `API_URL` on purpose. There is no CI workflow, so those three are the whole gate. The hooks run most of it for you: `lint-staged` on commit, `commitlint` on the message, and on push typecheck, the unit suite, and the browser suite when the API answers — it says so and skips when it does not.
 
 `pnpm test:e2e` drives a production build against a live `fastapi-template`. Start it with `docker compose up -d` in that repository; the suite registers an account of its own and deactivates it afterwards, or takes `E2E_EMAIL` and `E2E_PASSWORD` if you would rather name one. It fails in one second with a readable message when the API is not answering.
 
@@ -86,3 +86,16 @@ One gotcha: when applying `buttonVariants()` to something that is not a `Button`
 ```bash
 pnpm dlx shadcn@latest add <component>
 ```
+
+## Releases
+
+`CHANGELOG.md` is generated from the commit history with [git-cliff](https://git-cliff.org), configured in `cliff.toml`. The binary is not a dependency of this repository; `pnpm dlx` fetches it on demand.
+
+```bash
+pnpm dlx git-cliff@2.13.1 --tag v1.0.0 --output CHANGELOG.md
+git add CHANGELOG.md package.json
+git commit -m "chore: release v1.0.0"
+git tag -a v1.0.0 -m v1.0.0
+```
+
+Bump `version` in `package.json` first, then regenerate, then tag. Versioning is semver: a change to the template's layout, configuration or the shape of a port is a major bump, a new slice or screen is a minor one, and everything else is a patch. The changelog tracks the template itself: clear it when you start a project from this repository, since the history belongs to the template rather than your app.
