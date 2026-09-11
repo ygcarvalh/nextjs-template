@@ -13,11 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/features/auth/server/auth-actions";
 import type { Theme } from "@/features/preferences/types";
-import {
-  useCurrentTheme,
-  useLocaleChoice,
-  useThemeChoice,
-} from "@/features/preferences/use-preference-choice";
+import { useLocaleChoice } from "@/features/preferences/use-locale-choice";
+import { useCurrentTheme, useThemeChoice } from "@/features/preferences/use-theme-choice";
 import { BrazilFlag, UnitedStatesFlag } from "@/i18n/components/flags";
 import { LOCALE_NAMES, LOCALES, type Locale } from "@/i18n/locale";
 import { useDictionary } from "@/i18n/provider";

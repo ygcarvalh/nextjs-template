@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useReferenceChoice } from "@/features/preferences/use-preference-choice";
+import { useReferenceChoice } from "@/features/preferences/use-reference-choice";
 import { useDictionary } from "@/i18n/provider";
 
 export function ReferenceToggle({ enabled }: { enabled: boolean }) {

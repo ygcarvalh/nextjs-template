@@ -2,7 +2,7 @@
 
 import type { MouseEvent } from "react";
 import { chooseLocale } from "@/features/preferences/server/preference-actions";
-import { useLocaleChoice } from "@/features/preferences/use-preference-choice";
+import { useLocaleChoice } from "@/features/preferences/use-locale-choice";
 import { BrazilFlag, UnitedStatesFlag } from "@/i18n/components/flags";
 import { LOCALE_NAMES, LOCALES, type Locale } from "@/i18n/locale";
 import { cn } from "@/lib/utils";

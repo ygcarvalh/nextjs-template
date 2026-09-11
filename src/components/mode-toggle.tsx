@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Theme } from "@/features/preferences/types";
-import { useCurrentTheme, useThemeChoice } from "@/features/preferences/use-preference-choice";
+import { useCurrentTheme, useThemeChoice } from "@/features/preferences/use-theme-choice";
 import { useDictionary } from "@/i18n/provider";
 
 export function ModeToggle() {

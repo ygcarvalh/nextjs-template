@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useFeatureChoice } from "@/features/preferences/use-preference-choice";
+import { useFeatureChoice } from "@/features/preferences/use-feature-choice";
 import { useDictionary } from "@/i18n/provider";
 import { FLAGS, type Flag } from "@/lib/flags";
 
