@@ -10,6 +10,7 @@ spot. `angular-template` and `fastapi-template` keep the same file for the same 
 | Pass | Date | Result |
 | --- | --- | --- |
 | Audit and release | 2026-09-11 | Done, released as v1.0.0 |
+| Dependencies and template flag | 2026-09-11 | Done, unreleased on `main` |
 
 The 2026-09-11 pass measured the gate on a fresh clone before touching anything: `pnpm verify`
 green except for `next build` without `.env.local`, 70 spec files, 535 tests, 98.82% statements,
@@ -22,23 +23,14 @@ numbers, pinned pnpm 11 with `engine-strict`, added `cliff.toml`, and wrote the 
 `route-gate.ts`, `session-rotation.ts` and `lib/edge-request.ts`, narrowed the two swallowed cookie
 writes in `api-client.ts` to the one error a render produces, split the preference hooks into one
 file per concern, raised the TypeScript target to ES2022, and removed the 124 explanatory comments
-the code carried; what they explained lives below and in the README.
+the code carried; what they explained lives below and in the README. A third batch, after the tag,
+replaced the deprecated `prom-client` with `@prometheus-io/client` (a drop-in: one import line
+changed), moved every dependency to its latest release including TypeScript 7 and Vitest 5, and
+marked the repository as a template on GitHub. The full `pnpm audit`, dev dependencies included,
+came back clean after the bumps, so no override was needed for the twelve tooling findings.
 
 ## Standing debt, no pass assigned
 
-- **`prom-client` is deprecated upstream.** The registry marks 15.1.3 as replaced by
-  `@prometheus-io/client`. `src/lib/metrics.ts` and `src/app/api/metrics/route.ts` are the only
-  importers. It is a dependency change and waits for a yes.
-- **`pnpm audit` without `--prod` reports twelve findings.** On 2026-09-11: `fast-uri` and `js-yaml`
-  (high), `hono`, `qs` and `vitest` (moderate), all reached through the shadcn CLI, Vitest and their
-  parsers. None of them ships. `pnpm audit --prod --audit-level moderate` is clean, and that is the
-  command the gate and the landing page's ledger claim. Overrides in `pnpm-workspace.yaml` would
-  silence them; each is a dependency change.
-- **Dependencies were left where the initial commit pinned them, apart from the three security
-  bumps.** Outdated on 2026-09-11: `@base-ui/react` 1.6.0 to 1.8.0, `lucide-react` 1.28 to 1.44,
-  `react` and `react-dom` 19.2.8 to 19.3.0, `zod` 4.4.3 to 4.6.1, `@biomejs/biome` 2.5.6 to
-  2.5.13, `@playwright/test` 1.62.1 to 1.63.0, `shadcn` 4.16 to 4.21, and majors for `typescript`
-  (7), `vitest` and `@vitest/coverage-v8` (5). Dependabot groups the routine ones weekly.
 - **The root failure screen is English only.** `src/app/global-error.tsx` renders when the root
   layout itself throws, before any provider exists, so no dictionary can reach it. It is the one
   deliberate exception to the rule that every visible string lives in both dictionaries. The
@@ -49,10 +41,18 @@ the code carried; what they explained lives below and in the README.
   step of `verify` imports it. `README.md` and `CONTRIBUTING.md` say so; the alternative is a
   `verify` that exports a placeholder, which would hide exactly the failure the validation exists
   to surface.
-- **The repository is not marked as a template on GitHub.** `gh repo edit --template` is a remote
-  write and waits for a yes.
-
 ## Settled facts later passes should not re-derive
+
+**Vitest 5 no longer picks up matcher types from the `jest` namespace.** `@types/jest-axe`
+augments `jest.Matchers` and `@jest/expect`, which Vitest 4 read through `globals: true` and Vitest
+5 does not, so `toHaveNoViolations` became a type error in every axe test. `vitest.d.ts` at the
+root declares the matcher on `Assertion` and `AsymmetricMatchersContaining`, the same shape
+`@testing-library/jest-dom/vitest` uses for its own matchers. TypeScript 7.0.2 type-checks the
+repository with no other change.
+
+**A Playwright bump needs `pnpm exec playwright install chromium`.** The browser build is keyed to
+the package version; after `@playwright/test` moves, the suite fails every spec in a few
+milliseconds with `Executable doesn't exist` until the new build is downloaded.
 
 **The landing page's ledger is held to the config by a test.** `src/features/verification/gates.ts`
 declares the coverage floor, the browser-flow count and the header count; `gates.test.ts` reads

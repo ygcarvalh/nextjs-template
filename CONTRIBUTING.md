@@ -20,7 +20,7 @@ pnpm test:e2e                            # needs the sibling API running
 
 `pnpm verify` needs `.env.local`: the build imports `src/env.ts`, which has no default for `API_URL` on purpose. There is no CI workflow, so those three are the whole gate. The hooks run most of it for you: `lint-staged` on commit, `commitlint` on the message, and on push typecheck, the unit suite, and the browser suite when the API answers — it says so and skips when it does not.
 
-`pnpm test:e2e` drives a production build against a live `fastapi-template`. Start it with `docker compose up -d` in that repository; the suite registers an account of its own and deactivates it afterwards, or takes `E2E_EMAIL` and `E2E_PASSWORD` if you would rather name one. It fails in one second with a readable message when the API is not answering.
+`pnpm test:e2e` drives a production build against a live `fastapi-template`. Run `pnpm exec playwright install chromium` once after cloning and again after a `@playwright/test` bump; the browser build is keyed to the package version. Start it with `docker compose up -d` in that repository; the suite registers an account of its own and deactivates it afterwards, or takes `E2E_EMAIL` and `E2E_PASSWORD` if you would rather name one. It fails in one second with a readable message when the API is not answering.
 
 ## Commits
 
