@@ -10,7 +10,7 @@ spot. `angular-template` and `fastapi-template` keep the same file for the same 
 | Pass | Date | Result |
 | --- | --- | --- |
 | Audit and release | 2026-09-11 | Done, released as v1.0.0 |
-| Dependencies and template flag | 2026-09-11 | Done, unreleased on `main` |
+| Dependencies and template flag | 2026-09-11 | Done, released as v1.1.0 |
 
 The 2026-09-11 pass measured the gate on a fresh clone before touching anything: `pnpm verify`
 green except for `next build` without `.env.local`, 70 spec files, 535 tests, 98.82% statements,

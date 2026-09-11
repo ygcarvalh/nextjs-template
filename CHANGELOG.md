@@ -2,6 +2,17 @@
 
 All notable changes to this template. Generated from Conventional Commits with [git-cliff](https://git-cliff.org). Clear this file when you start a project from the template.
 
+## 1.1.0 - 2026-09-11
+
+### Documentation
+
+- Close the dependency debt in the roadmap
+
+### Miscellaneous
+
+- Move to the maintained prometheus client
+- Move every dependency to its latest
+
 ## 1.0.0 - 2026-09-11
 
 ### Bug fixes
@@ -30,6 +41,7 @@ All notable changes to this template. Generated from Conventional Commits with [
 - Drop the actions block from dependabot
 - Add the git-cliff configuration
 - Compile for es2022 runtimes
+- Release v1.0.0
 
 ### Refactoring
 

@@ -1,6 +1,6 @@
 {
   "name": "nextjs-template",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "A Next.js starter with public and private route groups, a replaceable auth seam, and a test suite that gates the build.",
   "license": "MIT",
