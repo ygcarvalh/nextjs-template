@@ -1,62 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { env } from "@/env";
-import { withCookie } from "@/features/auth/server/forwarded-cookies";
-import { expiresWithin, lifetimeSeconds } from "@/features/auth/server/jwt-claims";
-import {
-  ACCESS_COOKIE,
-  REFRESH_COOKIE,
-  tokenCookieOptions,
-} from "@/features/auth/server/session-cookie";
-import { exchangeRefresh, type TokenPair } from "@/features/auth/server/token-exchange";
+import { classifyRoute, type RouteVerdict } from "@/features/auth/server/route-gate";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/features/auth/server/session-cookie";
+import { applyRotation, rotateSession } from "@/features/auth/server/session-rotation";
+import { clientAddress, logRequestReceived } from "@/lib/edge-request";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { REQUEST_ID_HEADER, resolveRequestId } from "@/lib/request-id";
 
-// Everything is gated unless it is named here, so a screen added next month is
-// protected by forgetting rather than by remembering.
-const PUBLIC_PAGES = new Set(["/", "/login", "/register"]);
-const PUBLIC_API = new Set(["/api/health", "/api/metrics"]);
-const CREDENTIAL_POSTS = new Set(["/login", "/register"]);
-const SIGNED_OUT_ONLY = new Set(["/login", "/register"]);
-const UNLOGGED_PATHS = new Set(["/api/health", "/api/metrics"]);
-
-const ACCESS_SKEW_MS = 60_000;
+const SIGNED_IN_HOME = "/notes";
 
 const limiter = createRateLimiter({ windowMs: 60_000, max: 60 });
 const credentialLimiter = createRateLimiter({ windowMs: 60_000, max: 10 });
 
-function isApi(pathname: string): boolean {
-  return pathname === "/api" || pathname.startsWith("/api/");
-}
-
-function clientKey(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
-  return request.headers.get("x-real-ip") ?? "unknown";
-}
-
-// Pino does not run on the edge runtime, so this writes the same shape by hand.
-function logReceived(request: NextRequest, requestId: string): void {
-  if (UNLOGGED_PATHS.has(request.nextUrl.pathname)) {
-    return;
-  }
-  console.log(
-    JSON.stringify({
-      event: "request.received",
-      method: request.method,
-      path: request.nextUrl.pathname,
-      client_ip: clientKey(request),
-      request_id: requestId,
-      service: env.SERVICE_NAME,
-      level: "info",
-      timestamp: new Date().toISOString(),
-    }),
-  );
-}
-
-// The header lets the browser and any downstream service read the id; the
-// cookie lets the client error boundary quote it without a fetch to read.
 function tagged(response: NextResponse, requestId: string): NextResponse {
   response.headers.set(REQUEST_ID_HEADER, requestId);
   response.cookies.set({
@@ -85,90 +39,60 @@ function tooManyRequests(resetAt: number, limit: number): NextResponse {
   );
 }
 
-function storeTokens(response: NextResponse, pair: TokenPair): void {
-  response.cookies.set(
-    ACCESS_COOKIE,
-    pair.access_token,
-    tokenCookieOptions(lifetimeSeconds(pair.access_token)),
-  );
-  response.cookies.set(
-    REFRESH_COOKIE,
-    pair.refresh_token,
-    tokenCookieOptions(lifetimeSeconds(pair.refresh_token)),
-  );
+function throttle(request: NextRequest, route: RouteVerdict): NextResponse | null {
+  const guardedApi = route.api && route.guarded;
+  if (!guardedApi && !route.credentialPost) {
+    return null;
+  }
+  const bucket = route.credentialPost ? credentialLimiter : limiter;
+  const verdict = bucket.check(clientAddress(request));
+  return verdict.allowed ? null : tooManyRequests(verdict.resetAt, verdict.limit);
+}
+
+function unauthorized(): NextResponse {
+  return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+}
+
+function toSignIn(request: NextRequest): NextResponse {
+  const { pathname, search } = request.nextUrl;
+  const url = request.nextUrl.clone();
+  url.pathname = "/login";
+  url.search = "";
+  url.searchParams.set("next", `${pathname}${search}`);
+  return NextResponse.redirect(url);
 }
 
 export default async function proxy(request: NextRequest) {
-  const { pathname, search } = request.nextUrl;
-
   const requestId = resolveRequestId(request.headers.get(REQUEST_ID_HEADER));
-  logReceived(request, requestId);
+  logRequestReceived(request, requestId);
 
-  const guardedApi = isApi(pathname) && !PUBLIC_API.has(pathname);
-  const guardedPage = !isApi(pathname) && !PUBLIC_PAGES.has(pathname);
-  // Server Actions are deliberately not counted. A 429 is not something a
-  // Server Action can answer with: React gets a response it cannot read, the
-  // form stays pending, and the reader is left with a button that says Saving
-  // forever. What is worth throttling — sign-in and the password change — the
-  // API throttles, where the answer can carry a message.
-  const isCredentialPost = CREDENTIAL_POSTS.has(pathname) && request.method === "POST";
-
-  if (guardedApi || isCredentialPost) {
-    const bucket = isCredentialPost ? credentialLimiter : limiter;
-    const verdict = bucket.check(clientKey(request));
-    if (!verdict.allowed) {
-      return tagged(tooManyRequests(verdict.resetAt, verdict.limit), requestId);
-    }
+  const route = classifyRoute(request.nextUrl.pathname, request.method);
+  const throttled = throttle(request, route);
+  if (throttled) {
+    return tagged(throttled, requestId);
   }
-
-  const access = request.cookies.get(ACCESS_COOKIE)?.value;
-  const refresh = request.cookies.get(REFRESH_COOKIE)?.value;
 
   const headers = new Headers(request.headers);
   headers.set(REQUEST_ID_HEADER, requestId);
+  const rotation = await rotateSession(
+    {
+      access: request.cookies.get(ACCESS_COOKIE)?.value,
+      refresh: request.cookies.get(REFRESH_COOKIE)?.value,
+    },
+    headers,
+    requestId,
+  );
 
-  // The only place that can rotate the pair for a render: a server component
-  // cannot write a cookie.
-  let rotated: TokenPair | null = null;
-  let cleared = false;
-  if (refresh && (!access || expiresWithin(access, ACCESS_SKEW_MS))) {
-    rotated = await exchangeRefresh(refresh, requestId);
-    if (rotated) {
-      headers.set("cookie", withCookie(headers.get("cookie"), ACCESS_COOKIE, rotated.access_token));
-    } else {
-      cleared = true;
-    }
+  if (!rotation.signedIn && route.guarded) {
+    return tagged(route.api ? unauthorized() : toSignIn(request), requestId);
   }
 
-  const signedIn = Boolean(rotated) || (Boolean(access) && !cleared);
-
-  if (!signedIn && guardedApi) {
-    return tagged(
-      NextResponse.json({ error: "Authentication required" }, { status: 401 }),
-      requestId,
-    );
-  }
-
-  if (!signedIn && guardedPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.search = "";
-    url.searchParams.set("next", `${pathname}${search}`);
-    return tagged(NextResponse.redirect(url), requestId);
-  }
-
-  if (signedIn && SIGNED_OUT_ONLY.has(pathname) && request.method === "GET") {
-    return tagged(NextResponse.redirect(new URL("/notes", request.url)), requestId);
+  if (rotation.signedIn && route.signedOutOnly) {
+    return tagged(NextResponse.redirect(new URL(SIGNED_IN_HOME, request.url)), requestId);
   }
 
   const response = tagged(NextResponse.next({ request: { headers } }), requestId);
-  if (rotated) {
-    storeTokens(response, rotated);
-  }
-  if (cleared) {
-    response.cookies.delete(ACCESS_COOKIE);
-    response.cookies.delete(REFRESH_COOKIE);
-  }
+  applyRotation(response, rotation);
   return response;
 }
 
