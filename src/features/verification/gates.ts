@@ -8,7 +8,7 @@ export interface VerificationGate {
   source: string;
 }
 
-export const COVERAGE_FLOOR_PERCENT = 95;
+export const COVERAGE_FLOOR_PERCENT = 97;
 export const BROWSER_FLOW_COUNT = 27;
 
 export const verificationGates: VerificationGate[] = [

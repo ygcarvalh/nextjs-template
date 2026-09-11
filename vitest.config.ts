@@ -29,10 +29,10 @@ export default defineConfig({
         "src/components/theme-provider.tsx",
       ],
       thresholds: {
-        lines: 95,
+        lines: 97,
         functions: 100,
-        branches: 90,
-        statements: 95,
+        branches: 95,
+        statements: 97,
       },
     },
     env: {
