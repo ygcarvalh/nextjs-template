@@ -7,7 +7,7 @@ import { enUS } from "@/i18n/dictionaries/en-US";
 
 const setTheme = vi.fn();
 
-vi.mock("next-themes", () => ({ useTheme: () => ({ setTheme }) }));
+vi.mock("next-themes", () => ({ useTheme: () => ({ theme: "dark", setTheme }) }));
 vi.mock("@/features/preferences/server/preference-actions", () => ({ chooseTheme: vi.fn() }));
 
 describe("ModeToggle", () => {
@@ -33,5 +33,19 @@ describe("ModeToggle", () => {
 
     expect(setTheme).toHaveBeenCalledWith(value);
     expect(vi.mocked(chooseTheme).mock.calls[0][0].get("theme")).toBe(value);
+  });
+
+  it("marks the theme in use", async () => {
+    render(<ModeToggle />);
+
+    await userEvent.click(screen.getByRole("button", { name: enUS.chrome.toggleTheme }));
+
+    expect(await screen.findByRole("menuitem", { name: enUS.chrome.themeDark })).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+    expect(screen.getByRole("menuitem", { name: enUS.chrome.themeLight })).not.toHaveAttribute(
+      "aria-current",
+    );
   });
 });

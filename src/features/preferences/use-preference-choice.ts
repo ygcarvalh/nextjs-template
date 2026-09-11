@@ -8,7 +8,7 @@ import {
   chooseShowRequestId,
   chooseTheme,
 } from "@/features/preferences/server/preference-actions";
-import type { Theme } from "@/features/preferences/types";
+import { parseTheme, type Theme } from "@/features/preferences/types";
 import type { Locale } from "@/i18n/locale";
 import { type Flag, serializeFlags } from "@/lib/flags";
 
@@ -30,6 +30,11 @@ export function useThemeChoice(): (theme: Theme) => void {
     },
     [setTheme],
   );
+}
+
+export function useCurrentTheme(): Theme | null {
+  const { theme } = useTheme();
+  return parseTheme(theme);
 }
 
 // A reload rather than router.refresh(): the value the root layout reads is a

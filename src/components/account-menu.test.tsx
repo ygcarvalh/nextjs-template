@@ -8,7 +8,7 @@ import { enUS } from "@/i18n/dictionaries/en-US";
 
 const setTheme = vi.fn();
 
-vi.mock("next-themes", () => ({ useTheme: () => ({ setTheme }) }));
+vi.mock("next-themes", () => ({ useTheme: () => ({ theme: "dark", setTheme }) }));
 vi.mock("@/features/auth/server/auth-actions", () => ({ signOut: vi.fn() }));
 vi.mock("@/features/preferences/server/preference-actions", () => ({
   chooseLocale: vi.fn().mockResolvedValue(undefined),
@@ -63,6 +63,18 @@ describe("AccountMenu", () => {
       "true",
     );
     expect(screen.getByRole("menuitem", { name: "Português" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("marks the theme in use", async () => {
+    await open();
+
+    expect(await screen.findByRole("menuitem", { name: enUS.chrome.themeDark })).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+    expect(screen.getByRole("menuitem", { name: enUS.chrome.themeLight })).not.toHaveAttribute(
+      "aria-current",
+    );
   });
 
   // The region rule is off because the popup is portalled to the body, where it

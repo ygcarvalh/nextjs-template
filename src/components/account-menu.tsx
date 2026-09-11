@@ -12,9 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/features/auth/server/auth-actions";
-import { chooseLocale, chooseTheme } from "@/features/preferences/server/preference-actions";
 import type { Theme } from "@/features/preferences/types";
-import { useLocaleChoice, useThemeChoice } from "@/features/preferences/use-preference-choice";
+import {
+  useCurrentTheme,
+  useLocaleChoice,
+  useThemeChoice,
+} from "@/features/preferences/use-preference-choice";
 import { BrazilFlag, UnitedStatesFlag } from "@/i18n/components/flags";
 import { LOCALE_NAMES, LOCALES, type Locale } from "@/i18n/locale";
 import { useDictionary } from "@/i18n/provider";
@@ -25,6 +28,7 @@ export function AccountMenu({ locale }: { locale: Locale }) {
   const t = useDictionary();
   const chooseTheme = useThemeChoice();
   const chooseLanguage = useLocaleChoice();
+  const currentTheme = useCurrentTheme();
 
   const themes: { value: Theme; label: string; Icon: typeof Sun }[] = [
     { value: "light", label: t.chrome.themeLight, Icon: Sun },
@@ -64,7 +68,12 @@ export function AccountMenu({ locale }: { locale: Locale }) {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="running-head">{t.chrome.theme}</DropdownMenuLabel>
           {themes.map(({ value, label, Icon }) => (
-            <DropdownMenuItem key={value} onClick={() => chooseTheme(value)} className="gap-2.5">
+            <DropdownMenuItem
+              key={value}
+              onClick={() => chooseTheme(value)}
+              aria-current={value === currentTheme ? "true" : undefined}
+              className="gap-2.5"
+            >
               <Icon className="h-4 w-4" aria-hidden />
               {label}
             </DropdownMenuItem>

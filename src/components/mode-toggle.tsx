@@ -9,12 +9,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Theme } from "@/features/preferences/types";
-import { useThemeChoice } from "@/features/preferences/use-preference-choice";
+import { useCurrentTheme, useThemeChoice } from "@/features/preferences/use-preference-choice";
 import { useDictionary } from "@/i18n/provider";
 
 export function ModeToggle() {
   const t = useDictionary();
   const choose = useThemeChoice();
+  const current = useCurrentTheme();
 
   const themes: { value: Theme; label: string }[] = [
     { value: "light", label: t.chrome.themeLight },
@@ -32,7 +33,11 @@ export function ModeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {themes.map(({ value, label }) => (
-          <DropdownMenuItem key={value} onClick={() => choose(value)}>
+          <DropdownMenuItem
+            key={value}
+            onClick={() => choose(value)}
+            aria-current={value === current ? "true" : undefined}
+          >
             {label}
           </DropdownMenuItem>
         ))}
